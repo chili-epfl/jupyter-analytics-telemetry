@@ -4,7 +4,7 @@
 [![Build](https://github.com/chili-epfl/jupyter-analytics-telemetry/actions/workflows/build.yml/badge.svg)](https://github.com/chili-epfl/jupyter-analytics-telemetry/actions/workflows/build.yml)
 [![Check Release](https://github.com/chili-epfl/jupyter-analytics-telemetry/actions/workflows/check-release.yml/badge.svg)](https://github.com/chili-epfl/jupyter-analytics-telemetry/actions/workflows/check-release.yml)
 
-This repository is part of the learning analytics system ([**Jupyter Analytics**](https://github.com/chili-epfl/jupyter-analytics)). It builds a JupyterLab extension that collects user data and sends it to the [**Backend**](https://github.com/chili-epfl/jupyter-analytics-backend).
+This repository is part of the learning analytics system ([**Jupyter Analytics**](https://github.com/chili-epfl/jupyter-analytics)). It builds a JupyterLab extension that collects user interaction data and sends it to the [**Backend**](https://github.com/chili-epfl/jupyter-analytics-backend), which can be retrieved and visualized by [**Dashboard**](https://github.com/chili-epfl/jupyter-analytics-dashboard).
 
 ## Requirements
 
