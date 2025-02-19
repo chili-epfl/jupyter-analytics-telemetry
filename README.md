@@ -147,7 +147,9 @@ See [RELEASE](RELEASE.md)
 This project is part of the "[Uni Analytics](https://data.snf.ch/grants/grant/187534)" project funded by SNSF (Swiss National Science Foundation). That's why in the source code we put "unianalytics" as the identifier. 😃
 
 ## Citation
+
 If you find this repository useful, please cite our paper:
+
 ```
 Cai, Z., Davis, R., Mariétan, R., Tormey, R., & Dillenbourg, P. (2025).
 Jupyter Analytics: A Toolkit for Collecting, Analyzing, and Visualizing Distributed Student Activity in Jupyter Notebooks.
@@ -155,7 +157,9 @@ In Proceedings of the 56th ACM Technical Symposium on Computer Science Education
 ```
 
 ## Copyright
-© All rights reserved. ECOLE POLYTECHNIQUE FEDERALE DE LAUSANNE (EPFL), Switzerland, Computer-Human Interaction Lab for Learning & Instruction (CHILI), 2024
+
+© All rights reserved. ECOLE POLYTECHNIQUE FEDERALE DE LAUSANNE (EPFL), Switzerland, Computer-Human Interaction Lab for Learning & Instruction (CHILI), 2025
 
 ## License
+
 This project is licensed under the MIT License. See the [LICENSE](https://github.com/chili-epfl/jupyter-analytics-telemetry/blob/main/LICENSE) file for details.
