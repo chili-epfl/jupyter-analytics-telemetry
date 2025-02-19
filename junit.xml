@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="1" failures="0" errors="0" time="23.858">
+  <testsuite name="jupyterlab_unianalytics_telemetry" errors="0" failures="0" skipped="0" timestamp="2024-01-26T14:33:38" time="12.205" tests="1">
+    <testcase classname="jupyterlab_unianalytics_telemetry should be tested" name="jupyterlab_unianalytics_telemetry should be tested" time="0.006">
+    </testcase>
+  </testsuite>
+</testsuites>

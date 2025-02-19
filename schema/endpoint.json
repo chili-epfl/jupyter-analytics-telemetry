@@ -1,0 +1,20 @@
+{
+  "jupyter.lab.setting-icon-label": "Unianalytics: Telemetry Endpoint",
+  "title": "Unianalytics: Telemetry Endpoint",
+  "properties": {
+    "useLocalBackend": {
+      "type": "boolean",
+      "title": "Use local backend",
+      "description": "Whether to point the telemetry extension at a locally hosted backend (checked) or the endpoint provided below (unchecked).",
+      "default": false
+    },
+    "backendEndpoint": {
+      "type": "string",
+      "title": "Backend endpoint URL",
+      "description": "Ignored if 'Use local backend' is checked, traffic will be routed to 'localhost'",
+      "default": "https://api-unianalytics-elb.unianalytics.ch"
+    }
+  },
+  "additionalProperties": false,
+  "type": "object"
+}

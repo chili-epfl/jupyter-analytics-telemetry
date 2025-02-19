@@ -1,0 +1,15 @@
+{
+  "jupyter.lab.setting-icon": "jupyterlab_unianalytics_telemetry:schema-icon",
+  "jupyter.lab.setting-icon-label": "Unianalytics: Activity Collection",
+  "title": "Unianalytics: Activity Collection",
+  "properties": {
+    "SendExtension": {
+      "type": "boolean",
+      "title": "Collect Notebook Activity",
+      "description": "Whether to enable anonymous data collection in specific notebooks for use in a teacher dashboard, assisting your teacher(s) in supporting your learning more effectively.",
+      "default": false
+    }
+  },
+  "additionalProperties": false,
+  "type": "object"
+}

@@ -1,0 +1,12 @@
+{
+  "title": "Unianalytics: Dialog Shown",
+  "properties": {
+    "DialogShown": {
+      "type": "boolean",
+      "description": "Boolean that reflects if the user has ever seen the dialog box for the unianalytics data collection consent.",
+      "default": false
+    }
+  },
+  "additionalProperties": false,
+  "type": "object"
+}
