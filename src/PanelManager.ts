@@ -1,13 +1,14 @@
 import { NotebookPanel } from '@jupyterlab/notebook';
-import { isNotebookValid } from './utils/utils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { WebsocketManager } from './websocket/WebsocketManager';
+import { isNotebookValid } from './utils/utils';
+import { handleSyncMessage } from './utils/notebookSync';
 import { EXTENSION_SETTING_NAME } from './utils/constants';
 import { CellMappingDisposable } from './trackers/CellMappingDisposable';
 import { ExecutionDisposable } from './trackers/ExecutionDisposable';
 import { AlterationDisposable } from './trackers/AlterationDisposable';
 import { FocusDisposable } from './trackers/FocusDisposable';
-import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { disabledNotebooksSignaler } from '.';
 
 export class PanelManager {
@@ -118,7 +119,15 @@ export class PanelManager {
               notebookId
             );
 
-            this._websocketManager.establishSocketConnection(notebookId);
+            // Establish the socket connection and pass the message handler
+            this._websocketManager.establishSocketConnection(
+              notebookId,
+              message => {
+                if (this._panel) {
+                  handleSyncMessage(this._panel, message);
+                }
+              }
+            );
           }
         });
       }

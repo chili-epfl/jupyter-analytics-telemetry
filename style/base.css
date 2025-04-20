@@ -3,3 +3,68 @@
 
     https://jupyterlab.readthedocs.io/en/stable/developer/css.html
 */
+.notification {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  bottom: 40px;
+  right: 50px;
+  padding: 8px;
+  background-color: white;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  border-radius: 5px;
+  font-size: large;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.notification p {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.notification p:first-child {
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.notification-accept-button {
+  padding: 8px 16px;
+  background-color: #4caf50; /* Green */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 8px;
+  font-size: medium;
+}
+
+.notification-accept-button:hover {
+  filter: brightness(1.2);
+  transform: scale(1.05);
+}
+
+.notification-close-button {
+  padding: 8px 16px;
+  background-color: #f44336; /* Red */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: medium;
+}
+
+.notification-close-button:hover {
+  filter: brightness(1.2);
+  transform: scale(1.05);
+}
+
+.notification-button-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  gap: 10px;
+}

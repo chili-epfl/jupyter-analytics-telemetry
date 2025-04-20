@@ -8,6 +8,8 @@ export class WebsocketManager {
     this._socket = null;
   }
 
+  private _messageCallback: ((message: string) => void) | null = null;
+
   private _createSocket(notebookId: string, userId: string) {
     this._socket = io(
       `${WEBSOCKET_API_URL}?conType=STUDENT&nbId=${notebookId}&userId=${userId}`,
@@ -32,7 +34,9 @@ export class WebsocketManager {
     });
 
     this._socket.on('chat', (message: string) => {
-      console.log(`${APP_ID}: message received : ${message}`);
+      if (this._messageCallback) {
+        this._messageCallback(message); // Call the registered callback
+      }
     });
 
     this._socket.on('connect_error', (event: any) => {
@@ -40,9 +44,14 @@ export class WebsocketManager {
     });
   }
 
-  public establishSocketConnection(notebookId: string | null) {
+  public establishSocketConnection(
+    notebookId: string | null,
+    onMessage: (message: string) => void
+  ) {
     // if there is already a connection, close it and set the socket to null
     this.closeSocketConnection();
+
+    this._messageCallback = onMessage; // Register the callback
 
     if (!notebookId || !PERSISTENT_USER_ID) {
       return;
