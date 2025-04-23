@@ -1,6 +1,6 @@
 {
     "name": "jupyterlab_unianalytics_telemetry",
-    "version": "4.0.15",
+    "version": "4.0.16",
     "description": "A JupyterLab extension to send notebook interaction data to a backend.",
     "keywords": [
         "jupyter",
