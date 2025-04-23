@@ -43,16 +43,18 @@ function showUpdateNotification(
 ) {
   // Future: add a diff view of the changes
   let notificationTitle = 'Notebook Updated';
+  const notificationNote =
+    '(Note: your code will be kept in its original cell.)';
   let notificationBody =
-    'The teacher updated this notebook. Do you want to update your notebook with the latest content?';
+    'The teacher updated this notebook. Would you like to get the latest version?';
   if (action === UPDATE_CELL_ACTION) {
     notificationTitle = 'Cell Updated';
     notificationBody =
-      'The teacher updated a cell in this notebook. Do you want to update this cell with the latest content?';
+      'The teacher updated a cell in this notebook. Would you like to get the latest version?';
   } else if (action === UPDATE_NOTEBOOK_ACTION) {
     notificationTitle = 'Notebook Updated';
     notificationBody =
-      'The teacher updated the entire notebook. Do you want to update your notebook with the latest content?';
+      'The teacher updated the entire notebook. Would you like to get the latest version?';
   } else {
     console.error('Unknown action type:', action);
     return;
@@ -62,6 +64,7 @@ function showUpdateNotification(
       <div id="update-notification-${id}" class="notification">
         <p style="font-weight: bold;">${notificationTitle}</p>
         <p>${notificationBody}</p>
+        <p>${notificationNote}</p>
         <div class="notification-button-container">
           <button id="update-${id}-button" class="notification-accept-button">Update Now</button>
           <button id="close-${id}-button" class="notification-close-button">Close</button>
