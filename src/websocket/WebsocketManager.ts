@@ -8,7 +8,7 @@ export class WebsocketManager {
     this._socket = null;
   }
 
-  private _messageCallback: ((message: string) => void) | null = null;
+  private _messageCallback: ((message: string, sender: string) => void) | null = null;
 
   private _createSocket(notebookId: string, userId: string) {
     this._socket = io(
@@ -35,7 +35,13 @@ export class WebsocketManager {
 
     this._socket.on('chat', (message: string) => {
       if (this._messageCallback) {
-        this._messageCallback(message); // Call the registered callback
+        this._messageCallback(message, "teacher"); // Call the registered callback
+      }
+    });
+
+    this._socket.on('group_chat', (message: string) => {
+      if (this._messageCallback) {
+        this._messageCallback(message, "teammate"); // Call the registered callback
       }
     });
 
@@ -46,7 +52,7 @@ export class WebsocketManager {
 
   public establishSocketConnection(
     notebookId: string | null,
-    onMessage: (message: string) => void
+    onMessage: (message: string, sender: string) => void
   ) {
     // if there is already a connection, close it and set the socket to null
     this.closeSocketConnection();
@@ -64,6 +70,12 @@ export class WebsocketManager {
       this._socket.close();
     }
     this._socket = null;
+  }
+
+  public sendMessageToTeammates(userId: string, message: string) {
+    if (this._socket) {
+      this._socket.emit('group_message', { userId, message });
+    }
   }
 
   private _socket: Socket | null;

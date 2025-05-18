@@ -1,4 +1,8 @@
-import { NotebookPanel } from '@jupyterlab/notebook';
+import { NotebookPanel, NotebookActions } from '@jupyterlab/notebook';
+
+import { PERSISTENT_USER_ID } from '..';
+import { APP_ID } from './constants';
+import { WEBSOCKET_API_URL } from '../dataCollectionPlugin';
 
 // Sync action type constants
 const UPDATE_CELL_ACTION = 'update_cell';
@@ -13,7 +17,8 @@ interface ISyncMessagePayload {
 // Function to handle the 'chat' message and trigger updates
 export const handleSyncMessage = (
   notebookPanel: NotebookPanel,
-  message: string
+  message: string,
+  sender: string
 ) => {
   const jsonStart = message.indexOf('{');
   if (jsonStart === -1) {
@@ -26,10 +31,10 @@ export const handleSyncMessage = (
     const jsonParsed: ISyncMessagePayload = JSON.parse(jsonStr);
     if (jsonParsed.action === UPDATE_CELL_ACTION) {
       const contentJson = { cells: [jsonParsed.content] };
-      showUpdateNotification(notebookPanel, contentJson, jsonParsed.action);
+      showUpdateNotification(notebookPanel, contentJson, jsonParsed.action, sender);
     } else if (jsonParsed.action === UPDATE_NOTEBOOK_ACTION) {
       const contentJson = jsonParsed.content;
-      showUpdateNotification(notebookPanel, contentJson, jsonParsed.action);
+      showUpdateNotification(notebookPanel, contentJson, jsonParsed.action, sender);
     }
   } catch (error) {
     console.error('Error parsing JSON from sync message:', error, message);
@@ -39,22 +44,23 @@ export const handleSyncMessage = (
 function showUpdateNotification(
   notebookPanel: NotebookPanel,
   newContent: any,
-  action: typeof UPDATE_CELL_ACTION | typeof UPDATE_NOTEBOOK_ACTION
+  action: typeof UPDATE_CELL_ACTION | typeof UPDATE_NOTEBOOK_ACTION,
+  sender: string
 ) {
   // Future: add a diff view of the changes
   let notificationTitle = 'Notebook Updated';
   const notificationNote =
     '(Note: your code will be kept in its original cell.)';
   let notificationBody =
-    'The teacher updated this notebook. Would you like to get the latest version?';
+    `Your ${sender} updated this notebook. Would you like to get the latest version?`;
   if (action === UPDATE_CELL_ACTION) {
     notificationTitle = 'Cell Updated';
     notificationBody =
-      'The teacher updated a cell in this notebook. Would you like to get the latest version?';
+      `Your ${sender} updated a cell in this notebook. Would you like to get the latest version?`;
   } else if (action === UPDATE_NOTEBOOK_ACTION) {
     notificationTitle = 'Notebook Updated';
     notificationBody =
-      'The teacher updated the entire notebook. Would you like to get the latest version?';
+      `Your ${sender} updated the entire notebook. Would you like to get the latest version?`;
   } else {
     console.error('Unknown action type:', action);
     return;
@@ -96,38 +102,78 @@ async function updateNotebookContent(
   notebookPanel: NotebookPanel,
   newContent: any
 ) {
-  const content =
-    typeof newContent === 'string' ? JSON.parse(newContent) : newContent;
-  const cells = content.cells;
+  try {
+    const cellUpdates = typeof newContent === 'string'
+      ? JSON.parse(newContent).cells
+      : newContent.cells;
 
-  // const currentPanel = notebookTracker.currentWidget;
-  const notebook = notebookPanel?.content;
+    const notebook = notebookPanel.content;
 
-  cells.forEach((cell: any) => {
-    try {
-      const currentCell = notebook?.widgets.find(
-        (widget: any) => widget.model.id === cell.id
-      );
-      if (!currentCell) {
-        notebook?.model?.sharedModel.addCell(cell);
-      } else {
-        try {
-          const oldSource = currentCell.model.sharedModel.source;
-          const updatedSource =
-            oldSource +
-            `\n\n# UPDATED CONTENT AT ${new Date().toLocaleString()}\n\n` +
-            cell.source;
+    for (const cellUpdate of cellUpdates) {
+      const idx = notebook.widgets.findIndex(w => w.model.id === cellUpdate.id);
 
-          currentCell.model.sharedModel.setSource(updatedSource);
-        } catch (innerError) {
-          console.error(
-            `Inner error while updating cell with id ${cell.id}:`,
-            innerError
-          );
-        }
+      if (idx === -1) {
+        notebook.model?.sharedModel.addCell(cellUpdate);
+        continue;
       }
-    } catch (error) {
-      console.error(`Error updating cell with id ${cell.id}:`, error);
+
+      notebook.activeCellIndex = idx;
+      NotebookActions.insertBelow(notebook);
+
+      const insertedCell = notebook.widgets[idx + 1];
+      insertedCell.model.sharedModel.setSource(`# RECEIVED CELL\n\n${cellUpdate.source}`);
+
+      notebook.activeCellIndex = idx + 1;
     }
-  });
+  } catch (error) {
+    console.error('Failed to update notebook content:', error);
+  }
+}
+
+const getUserGroup = async (notebookId: string): Promise<string[]> => {
+  if (!PERSISTENT_USER_ID) {
+    console.log(`${APP_ID}: No user id`);
+    return [];
+  }
+  const url = `${WEBSOCKET_API_URL}/groups/users/${PERSISTENT_USER_ID}/groups/names?notebookId=${encodeURIComponent(notebookId)}`;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      console.error(`Failed to fetch groups: ${response.status}`);
+      return [];
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(`Error fetching user groups:`, error);
+    return [];
+  }
+};
+
+export const groupShareFlags = new Map<string, boolean>();
+
+export const checkGroupSharePermission = async (notebookId: string): Promise<void> => {
+  const groups = await getUserGroup(notebookId);
+  groupShareFlags.set(notebookId, groups.length > 0);
+};
+
+export const getConnectedTeammates = async (notebookId: string): Promise<string[]> => {
+  if (!PERSISTENT_USER_ID) {
+    console.log(`${APP_ID}: No user id`);
+    return [];
+  }
+    const url = `${WEBSOCKET_API_URL}/groups/users/${PERSISTENT_USER_ID}/teammates/connected?notebookId=${encodeURIComponent(notebookId)}`;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      console.error(`Failed to fetch connected teammates: ${response.status}`);
+      return [];
+    }
+    const data = await response.json();
+    
+    return data;
+  } catch (error) {
+    console.error(`Error fetching connected teammates:`, error);
+    return [];
+  }
 }

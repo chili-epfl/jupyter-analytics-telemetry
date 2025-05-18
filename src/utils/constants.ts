@@ -14,4 +14,6 @@ export namespace Selectors {
 
 export namespace CommandIDs {
   export const dashboardOpenChat = `${APP_ID}:unianalytics-open-chat`;
+
+  export const pushCellUpdate = `${APP_ID}:group-push-cell-update`;
 }
