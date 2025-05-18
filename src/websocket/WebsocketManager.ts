@@ -8,7 +8,8 @@ export class WebsocketManager {
     this._socket = null;
   }
 
-  private _messageCallback: ((message: string, sender: string) => void) | null = null;
+  private _messageCallback: ((message: string, sender: string) => void) | null =
+    null;
 
   private _createSocket(notebookId: string, userId: string) {
     this._socket = io(
@@ -35,13 +36,13 @@ export class WebsocketManager {
 
     this._socket.on('chat', (message: string) => {
       if (this._messageCallback) {
-        this._messageCallback(message, "teacher"); // Call the registered callback
+        this._messageCallback(message, 'teacher'); // Call the registered callback
       }
     });
 
     this._socket.on('group_chat', (message: string) => {
       if (this._messageCallback) {
-        this._messageCallback(message, "teammate"); // Call the registered callback
+        this._messageCallback(message, 'teammate'); // Call the registered callback
       }
     });
 

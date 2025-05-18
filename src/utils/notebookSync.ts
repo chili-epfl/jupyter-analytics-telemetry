@@ -31,10 +31,20 @@ export const handleSyncMessage = (
     const jsonParsed: ISyncMessagePayload = JSON.parse(jsonStr);
     if (jsonParsed.action === UPDATE_CELL_ACTION) {
       const contentJson = { cells: [jsonParsed.content] };
-      showUpdateNotification(notebookPanel, contentJson, jsonParsed.action, sender);
+      showUpdateNotification(
+        notebookPanel,
+        contentJson,
+        jsonParsed.action,
+        sender
+      );
     } else if (jsonParsed.action === UPDATE_NOTEBOOK_ACTION) {
       const contentJson = jsonParsed.content;
-      showUpdateNotification(notebookPanel, contentJson, jsonParsed.action, sender);
+      showUpdateNotification(
+        notebookPanel,
+        contentJson,
+        jsonParsed.action,
+        sender
+      );
     }
   } catch (error) {
     console.error('Error parsing JSON from sync message:', error, message);
@@ -51,16 +61,13 @@ function showUpdateNotification(
   let notificationTitle = 'Notebook Updated';
   const notificationNote =
     '(Note: your code will be kept in its original cell.)';
-  let notificationBody =
-    `Your ${sender} updated this notebook. Would you like to get the latest version?`;
+  let notificationBody = `Your ${sender} updated this notebook. Would you like to get the latest version?`;
   if (action === UPDATE_CELL_ACTION) {
     notificationTitle = 'Cell Updated';
-    notificationBody =
-      `Your ${sender} updated a cell in this notebook. Would you like to get the latest version?`;
+    notificationBody = `Your ${sender} updated a cell in this notebook. Would you like to get the latest version?`;
   } else if (action === UPDATE_NOTEBOOK_ACTION) {
     notificationTitle = 'Notebook Updated';
-    notificationBody =
-      `Your ${sender} updated the entire notebook. Would you like to get the latest version?`;
+    notificationBody = `Your ${sender} updated the entire notebook. Would you like to get the latest version?`;
   } else {
     console.error('Unknown action type:', action);
     return;
@@ -103,9 +110,10 @@ async function updateNotebookContent(
   newContent: any
 ) {
   try {
-    const cellUpdates = typeof newContent === 'string'
-      ? JSON.parse(newContent).cells
-      : newContent.cells;
+    const cellUpdates =
+      typeof newContent === 'string'
+        ? JSON.parse(newContent).cells
+        : newContent.cells;
 
     const notebook = notebookPanel.content;
 
@@ -121,7 +129,9 @@ async function updateNotebookContent(
       NotebookActions.insertBelow(notebook);
 
       const insertedCell = notebook.widgets[idx + 1];
-      insertedCell.model.sharedModel.setSource(`# RECEIVED CELL\n\n${cellUpdate.source}`);
+      insertedCell.model.sharedModel.setSource(
+        `# RECEIVED CELL\n\n${cellUpdate.source}`
+      );
 
       notebook.activeCellIndex = idx + 1;
     }
@@ -145,24 +155,28 @@ const getUserGroup = async (notebookId: string): Promise<string[]> => {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error(`Error fetching user groups:`, error);
+    console.error('Error fetching user groups:', error);
     return [];
   }
 };
 
 export const groupShareFlags = new Map<string, boolean>();
 
-export const checkGroupSharePermission = async (notebookId: string): Promise<void> => {
+export const checkGroupSharePermission = async (
+  notebookId: string
+): Promise<void> => {
   const groups = await getUserGroup(notebookId);
   groupShareFlags.set(notebookId, groups.length > 0);
 };
 
-export const getConnectedTeammates = async (notebookId: string): Promise<string[]> => {
+export const getConnectedTeammates = async (
+  notebookId: string
+): Promise<string[]> => {
   if (!PERSISTENT_USER_ID) {
     console.log(`${APP_ID}: No user id`);
     return [];
   }
-    const url = `${WEBSOCKET_API_URL}/groups/users/${PERSISTENT_USER_ID}/teammates/connected?notebookId=${encodeURIComponent(notebookId)}`;
+  const url = `${WEBSOCKET_API_URL}/groups/users/${PERSISTENT_USER_ID}/teammates/connected?notebookId=${encodeURIComponent(notebookId)}`;
   try {
     const response = await fetch(url);
     if (!response.ok) {
@@ -170,10 +184,10 @@ export const getConnectedTeammates = async (notebookId: string): Promise<string[
       return [];
     }
     const data = await response.json();
-    
+
     return data;
   } catch (error) {
-    console.error(`Error fetching connected teammates:`, error);
+    console.error('Error fetching connected teammates:', error);
     return [];
   }
-}
+};

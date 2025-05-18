@@ -59,7 +59,10 @@ export const dataCollectionPlugin = async (
       isEnabled: () => {
         const panel = panelManager.panel;
         if (panel) {
-          const notebookId = CompatibilityManager.getMetadataComp(panel.context.model, Selectors.notebookId);
+          const notebookId = CompatibilityManager.getMetadataComp(
+            panel.context.model,
+            Selectors.notebookId
+          );
           return groupShareFlags.get(notebookId) ?? false;
         }
         return false;
@@ -118,7 +121,10 @@ const pushUpdateToTeammates = async (
     return;
   }
 
-  const notebookId = CompatibilityManager.getMetadataComp(panelManager.panel?.context.model, Selectors.notebookId);
+  const notebookId = CompatibilityManager.getMetadataComp(
+    panelManager.panel?.context.model,
+    Selectors.notebookId
+  );
   const teammateList = getConnectedTeammates(notebookId);
 
   if ((await teammateList).length === 0) {

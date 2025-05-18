@@ -3,7 +3,10 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { WebsocketManager } from './websocket/WebsocketManager';
 import { isNotebookValid } from './utils/utils';
-import { handleSyncMessage, checkGroupSharePermission } from './utils/notebookSync';
+import {
+  handleSyncMessage,
+  checkGroupSharePermission
+} from './utils/notebookSync';
 import { EXTENSION_SETTING_NAME } from './utils/constants';
 import { CellMappingDisposable } from './trackers/CellMappingDisposable';
 import { ExecutionDisposable } from './trackers/ExecutionDisposable';
