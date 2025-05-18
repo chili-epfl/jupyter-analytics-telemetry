@@ -2,11 +2,15 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.0.18
+
+[Alpha] Enable pushing updates to teammates within a group
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.0.17
 
 Adding a real-time sync functionality that allows students to receive notebook and cell-level updates pushed by the teacher.
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.0.16
 
