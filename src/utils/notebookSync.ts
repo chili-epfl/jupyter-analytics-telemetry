@@ -128,12 +128,14 @@ async function updateNotebookContent(
       notebook.activeCellIndex = idx;
       NotebookActions.insertBelow(notebook);
 
-      const insertedCell = notebook.widgets[idx + 1];
+      const newCellIndex = idx + 1;
+      const insertedCell = notebook.widgets[newCellIndex];
       insertedCell.model.sharedModel.setSource(
-        `# RECEIVED CELL\n\n${cellUpdate.source}`
+        `# CELL RECEIVED AT ${new Date().toLocaleString()}\n\n${cellUpdate.source}`
       );
-
-      notebook.activeCellIndex = idx + 1;
+      notebook.activeCellIndex = newCellIndex;
+      notebook.mode = 'command';
+      notebook.scrollToItem(newCellIndex, 'center');
     }
   } catch (error) {
     console.error('Failed to update notebook content:', error);
