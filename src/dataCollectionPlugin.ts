@@ -7,6 +7,7 @@ import { PanelManager } from './PanelManager';
 import { APP_ID, CommandIDs } from './utils/constants';
 import { CompatibilityManager } from './utils/compatibility';
 import { Selectors } from './utils/constants';
+import { getOrigCellMapping } from './utils/utils';
 import { groupShareFlags, getConnectedTeammates } from './utils/notebookSync';
 
 const LOCAL_URL = 'http://localhost:1015';
@@ -90,15 +91,19 @@ export const dataCollectionPlugin = async (
 };
 
 const pushCellUpdate = async (panelManager: PanelManager) => {
+  const notebookPanel = panelManager.panel;
   const notebook = panelManager.panel?.content;
   const cell = notebook?.activeCell;
 
-  if (cell) {
+  if (notebookPanel && notebook && cell) {
     const model = cell.model;
+
+    const origCellMapping = getOrigCellMapping(notebookPanel);
+    const cellId = origCellMapping[notebook.activeCellIndex];
 
     // Use the minimal cell representation
     const minimalCell = {
-      id: model.id,
+      id: cellId,
       cell_type: model.type,
       source: model.toJSON().source
     };

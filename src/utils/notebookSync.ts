@@ -3,6 +3,7 @@ import { NotebookPanel, NotebookActions } from '@jupyterlab/notebook';
 import { PERSISTENT_USER_ID } from '..';
 import { APP_ID } from './constants';
 import { WEBSOCKET_API_URL } from '../dataCollectionPlugin';
+import { getOrigCellMapping } from './utils';
 
 // Sync action type constants
 const UPDATE_CELL_ACTION = 'update_cell';
@@ -115,24 +116,29 @@ async function updateNotebookContent(
         ? JSON.parse(newContent).cells
         : newContent.cells;
 
+    const origCellMapping = getOrigCellMapping(notebookPanel);
     const notebook = notebookPanel.content;
+    const timeReceived = new Date().toLocaleString();
 
     for (const cellUpdate of cellUpdates) {
-      const idx = notebook.widgets.findIndex(w => w.model.id === cellUpdate.id);
+      const cellIndex = origCellMapping.lastIndexOf(cellUpdate.id);
+      const cellUpdateSource = `# CELL RECEIVED AT ${timeReceived}\n\n${cellUpdate.source}`;
 
-      if (idx === -1) {
+      // If not found, insert a new cell at the end
+      if (cellIndex === -1) {
+        cellUpdate.source = cellUpdateSource;
         notebook.model?.sharedModel.addCell(cellUpdate);
         continue;
       }
 
-      notebook.activeCellIndex = idx;
+      // Insert a new cell with the updated content below the existing one(s)
+      notebook.activeCellIndex = cellIndex;
       NotebookActions.insertBelow(notebook);
 
-      const newCellIndex = idx + 1;
+      const newCellIndex = cellIndex + 1;
       const insertedCell = notebook.widgets[newCellIndex];
-      insertedCell.model.sharedModel.setSource(
-        `# CELL RECEIVED AT ${new Date().toLocaleString()}\n\n${cellUpdate.source}`
-      );
+      insertedCell.model.sharedModel.setSource(cellUpdateSource);
+
       notebook.activeCellIndex = newCellIndex;
       notebook.mode = 'command';
       notebook.scrollToItem(newCellIndex, 'center');

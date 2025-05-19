@@ -100,3 +100,20 @@ export const processCellOutput = (outputs: IOutput[]) => {
     cell_output_length
   };
 };
+
+export const getOrigCellMapping = (panel: NotebookPanel): string[] => {
+  if (!panel || panel.isDisposed) {
+    return [];
+  }
+
+  const cellMapping = CompatibilityManager.getMetadataComp(
+    panel.context.model,
+    Selectors.cellMapping
+  );
+
+  if (!cellMapping) {
+    return [];
+  }
+
+  return cellMapping.map((row: string[]) => row[1]);
+};
