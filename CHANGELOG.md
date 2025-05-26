@@ -2,11 +2,15 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.0.20
+
+[Beta] Enable pushing code/markdown cell updates to teammates within a group
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.0.19
 
 [Beta] Enable pushing updates to teammates within a group
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.0.18
 
