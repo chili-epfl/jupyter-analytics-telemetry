@@ -122,7 +122,13 @@ async function updateNotebookContent(
 
     for (const cellUpdate of cellUpdates) {
       const cellIndex = origCellMapping.lastIndexOf(cellUpdate.id);
-      const cellUpdateSource = `# CELL RECEIVED AT ${timeReceived}\n\n${cellUpdate.source}`;
+      const cellType = cellUpdate.cell_type || 'code';
+      let cellUpdateSource = '';
+      if (cellType === 'markdown') {
+        cellUpdateSource = `CELL RECEIVED AT ${timeReceived}\n\n${cellUpdate.source}`;
+      } else {
+        cellUpdateSource = `# CELL RECEIVED AT ${timeReceived}\n\n${cellUpdate.source}`;
+      }
 
       // If not found, insert a new cell at the end
       if (cellIndex === -1) {
@@ -134,6 +140,9 @@ async function updateNotebookContent(
       // Insert a new cell with the updated content below the existing one(s)
       notebook.activeCellIndex = cellIndex;
       NotebookActions.insertBelow(notebook);
+      if (cellType === 'markdown') {
+        NotebookActions.changeCellType(notebook, 'markdown'); // insertBelow only creates code cells
+      }
 
       const newCellIndex = cellIndex + 1;
       const insertedCell = notebook.widgets[newCellIndex];
