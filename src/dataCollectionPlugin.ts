@@ -43,7 +43,7 @@ export const dataCollectionPlugin = async (
     onEndpointChanged(endpointSettings);
     endpointSettings.changed.connect(onEndpointChanged);
 
-    const panelManager = new PanelManager(settings, dialogShownSettings);
+    const panelManager = new PanelManager(app, settings, dialogShownSettings);
 
     const labShell = app.shell as LabShell;
 

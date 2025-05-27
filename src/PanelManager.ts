@@ -13,12 +13,15 @@ import { ExecutionDisposable } from './trackers/ExecutionDisposable';
 import { AlterationDisposable } from './trackers/AlterationDisposable';
 import { FocusDisposable } from './trackers/FocusDisposable';
 import { disabledNotebooksSignaler } from '.';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 
 export class PanelManager {
   constructor(
+    app: JupyterFrontEnd,
     settings: ISettingRegistry.ISettings,
     dialogShownSettings: ISettingRegistry.ISettings
   ) {
+    this._app = app;
     this._panel = null;
 
     this._isDataCollectionEnabled = settings.get(EXTENSION_SETTING_NAME)
@@ -108,6 +111,7 @@ export class PanelManager {
             this._isDataCollectionEnabled
           ) {
             this._focusDisposable = new FocusDisposable(
+              this._app.commands,
               this._panel,
               notebookId
             );
@@ -209,6 +213,7 @@ export class PanelManager {
     this.panel = null;
   }
 
+  private _app: JupyterFrontEnd;
   private _panel: NotebookPanel | null;
   private _ongoingContextId = '';
   private _websocketManager: WebsocketManager;
