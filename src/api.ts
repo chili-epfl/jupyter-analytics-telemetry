@@ -7,7 +7,10 @@ import {
   ICodeExecObject,
   INotebookClickObject,
   IMarkdownExecObject,
-  PostDataObject
+  PostDataObject,
+  ICellCopyObject,
+  ICellPasteObject,
+  IClipBoardObject
 } from './utils/types';
 
 const postRequest = (data: PostDataObject, endpoint: string): void => {
@@ -56,6 +59,22 @@ export const postMarkdownExec = (markdownExec: IMarkdownExecObject): void => {
 
 export const postCellClick = (cellClick: ICellClickObject): void => {
   postRequest(cellClick, 'clickevent/cell');
+};
+
+export const postCellCopy = (cellCopy: ICellCopyObject): void => {
+  postRequest(cellCopy, 'copyevent/cell');
+};
+
+export const postCellPaste = (cellPaste: ICellPasteObject): void => {
+  postRequest(cellPaste, 'pasteevent/cell');
+};
+
+export const postClipboardCopy = (clipboardCopy: IClipBoardObject): void => {
+  postRequest(clipboardCopy, 'copyevent/clipboard');
+};
+
+export const postClipboardPaste = (clipboardPaste: IClipBoardObject): void => {
+  postRequest(clipboardPaste, 'pasteevent/clipboard');
 };
 
 export const postNotebookClick = (

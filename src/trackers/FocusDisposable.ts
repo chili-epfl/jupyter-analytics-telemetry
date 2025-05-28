@@ -1,15 +1,36 @@
 import { Signal } from '@lumino/signaling';
 import { IDisposable } from '@lumino/disposable';
+import { CommandRegistry } from '@lumino/commands';
 import { Cell, ICellModel } from '@jupyterlab/cells';
 import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
-import { postNotebookClick, postCellClick } from '../api';
+import {
+  postNotebookClick,
+  postCellClick,
+  postCellCopy,
+  postCellPaste,
+  postClipboardCopy,
+  postClipboardPaste
+} from '../api';
 import { Selectors } from '../utils/constants';
 import { CompatibilityManager } from '../utils/compatibility';
 
 type ClickType = 'OFF' | 'ON';
+interface ICellCopyData {
+  lastCopyCellId: string;
+  lastCopyNotebookId: string;
+  lastCopyTime: string;
+  lastCopyContent: string;
+}
+
+const CELL_COPY_ID: string = 'notebook:copy-cell';
+const CELL_PASTE_ID: string = 'notebook:paste-cell-below';
 
 export class FocusDisposable implements IDisposable {
-  constructor(panel: NotebookPanel, notebookId: string) {
+  constructor(
+    commands: CommandRegistry,
+    panel: NotebookPanel,
+    notebookId: string
+  ) {
     this._panel = panel;
 
     this._notebookId = notebookId;
@@ -21,6 +42,13 @@ export class FocusDisposable implements IDisposable {
 
     // connect to active cell changes
     panel.content.activeCellChanged.connect(this._onCellChanged, this);
+
+    // connect to commands executed
+    commands.commandExecuted.connect(this._onCommandExecuted, this);
+
+    // Add listener to copy and paste (to clipbaord)
+    document.addEventListener('copy', this._onClipboardCopy);
+    document.addEventListener('paste', this._onClipboardPaste);
 
     // panel.content is disposed before panel itself, so release the associated connection before
     panel.content.disposed.connect(this._onContentDisposed, this);
@@ -44,10 +72,56 @@ export class FocusDisposable implements IDisposable {
     this._sendCellClick('ON');
   };
 
+  private _onCommandExecuted = (
+    commandR: CommandRegistry,
+    args: CommandRegistry.ICommandExecutedArgs
+  ) => {
+    if (args.id === CELL_COPY_ID) {
+      this._onCopyCommandExecuted();
+    } else if (args.id === CELL_PASTE_ID) {
+      this._onPasteCommandExecuted();
+    }
+  };
+
+  private _onCopyCommandExecuted = () => {
+    console.log('A cell was copied!');
+    if (this._lastActiveCellId && this._lastActiveCellContent) {
+      this._cellCopyData = {
+        lastCopyNotebookId: this._notebookId,
+        lastCopyCellId: this._lastActiveCellId,
+        lastCopyTime: new Date().toISOString(),
+        lastCopyContent: this._lastActiveCellContent
+      };
+      this._sendCellCopy();
+    }
+  };
+
+  private _onPasteCommandExecuted = () => {
+    console.log('A cell was pasted!');
+    this._sendCellPaste();
+  };
+
+  private _onClipboardCopy = (event: ClipboardEvent) => {
+    const content = event.clipboardData?.getData('text');
+    console.log('Clipboard copied ', content);
+    if (content) {
+      this._sendClipboardCopy(content);
+    }
+  };
+
+  private _onClipboardPaste = (event: ClipboardEvent) => {
+    const content = event.clipboardData?.getData('text');
+    console.log('Clipboard pasted ', content);
+    if (content) {
+      this._sendClipboardPaste(content);
+    }
+  };
+
   private _setActiveCellAndOrigCellId = (
     activeCell: Cell<ICellModel> | null
   ) => {
     this._lastActiveCellId = activeCell?.model.sharedModel.getId();
+    this._lastActiveCellContent = activeCell?.model.toJSON().source.toString();
     if (this._lastActiveCellId) {
       this._lastOrigCellId = CompatibilityManager.getMetadataComp(
         this._panel?.model,
@@ -80,6 +154,53 @@ export class FocusDisposable implements IDisposable {
           click_duration: cellDurationSec
         });
       }
+    }
+  };
+
+  private _sendCellCopy = () => {
+    if (this._cellCopyData) {
+      postCellCopy({
+        notebook_id: this._cellCopyData.lastCopyNotebookId,
+        cell_id: this._cellCopyData.lastCopyCellId,
+        time: this._cellCopyData.lastCopyTime,
+        content: this._cellCopyData.lastCopyContent
+      });
+    }
+  };
+
+  private _sendCellPaste = () => {
+    if (this._cellCopyData && this._lastActiveCellId) {
+      postCellPaste({
+        notebook_id: this._notebookId,
+        copied_notebook_id: this._cellCopyData.lastCopyNotebookId,
+        copied_cell_id: this._cellCopyData.lastCopyCellId,
+        copied_time: this._cellCopyData.lastCopyTime,
+        cell_id: this._lastActiveCellId,
+        time: new Date().toISOString(),
+        content: this._cellCopyData.lastCopyContent
+      });
+    }
+  };
+
+  private _sendClipboardCopy = (content: string) => {
+    if (this._lastActiveCellId) {
+      postClipboardCopy({
+        notebook_id: this._notebookId,
+        cell_id: this._lastActiveCellId,
+        time: new Date().toISOString(),
+        content: content
+      });
+    }
+  };
+
+  private _sendClipboardPaste = (content: string) => {
+    if (this._lastActiveCellId) {
+      postClipboardPaste({
+        notebook_id: this._notebookId,
+        cell_id: this._lastActiveCellId,
+        time: new Date().toISOString(),
+        content: content
+      });
     }
   };
 
@@ -116,7 +237,10 @@ export class FocusDisposable implements IDisposable {
 
     this._isDisposed = true;
     this._lastActiveCellId = null;
+    this._cellCopyData = null;
 
+    document.removeEventListener('copy', this._onClipboardCopy);
+    document.removeEventListener('paste', this._onClipboardPaste);
     Signal.clearData(this);
   }
 
@@ -124,7 +248,9 @@ export class FocusDisposable implements IDisposable {
   private _panel: NotebookPanel;
   private _notebookId: string;
   private _lastActiveCellId: string | null | undefined = null;
+  private _lastActiveCellContent: string | null | undefined = null;
   private _lastOrigCellId: string | null | undefined = null;
+  private _cellCopyData: ICellCopyData | null | undefined = null;
 
   private _notebookStart: Date = new Date();
   private _cellStart: Date = new Date();

@@ -44,9 +44,28 @@ export interface ICellAlterationObject extends IBaseEvent {
   time: string;
 }
 
+interface ICopyPaste extends IBaseEvent {
+  cell_id: string;
+  time: string;
+  content: string;
+}
+
+export interface ICellCopyObject extends ICopyPaste {}
+
+export interface ICellPasteObject extends ICopyPaste {
+  copied_notebook_id: string;
+  copied_cell_id: string;
+  copied_time: string;
+}
+
+export interface IClipBoardObject extends ICopyPaste {}
+
 export type PostDataObject =
   | ICodeExecObject
   | IMarkdownExecObject
   | INotebookClickObject
   | ICellClickObject
-  | ICellAlterationObject;
+  | ICellAlterationObject
+  | ICellCopyObject
+  | ICellPasteObject
+  | IClipBoardObject;
