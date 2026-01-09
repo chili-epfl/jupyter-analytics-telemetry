@@ -68,3 +68,915 @@
   justify-content: flex-end;
   gap: 10px;
 }
+
+.notification-later-button {
+  padding: 8px 16px;
+  background-color: transparent;
+  color: #1976d2; /* primary blue */
+  border: 2px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 8px;
+  font-size: medium;
+  transition: background-color 120ms ease, transform 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.notification-later-button:hover {
+  background-color: rgba(25, 118, 210, 0.08);
+  transform: translateY(-1px);
+}
+
+.notification-later-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.16);
+}
+
+
+/* Pending updates sidebar styling */
+.pending-updates-container {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pending-update-row {
+  background: var(--jp-layout-color0, #fff);
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pending-update-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pending-update-label {
+  font-weight: 600;
+  color: var(--jp-ui-font-color1, #222);
+  font-size: 0.95rem;
+}
+
+.pending-update-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Generic small button */
+.btn {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: transform 100ms ease, box-shadow 100ms ease;
+}
+
+.btn:hover { transform: translateY(-1px); }
+
+.btn-apply {
+  background:#4caf50;
+  color: white;
+  border-color: rgba(0,0,0,0.05);
+}
+
+.btn-delete {
+  background:#f44336;
+  color: white;
+  border-color: rgba(0,0,0,0.05);
+}
+
+/* Code preview */
+.pending-update-code-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pending-update-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Courier New", monospace;
+  font-size: 0.86rem;
+  white-space: pre-wrap;
+  overflow: hidden;
+  max-height: 9em;
+  padding: 10px;
+  border-radius: 6px;
+  background: rgba(0,0,0,0.03);
+  transition: max-height 200ms ease;
+}
+
+/* expanded view */
+.pending-update-code.expanded {
+  max-height: 40em;
+  overflow: auto;
+}
+
+/* code controls */
+.pending-update-code-controls {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.pending-updates-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--jp-border-color2, #e6e6e6);
+  background: var(--jp-layout-color1, transparent);
+}
+
+.pending-updates-header .btn {
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  min-width: 72px;
+  line-height: 1;
+}
+
+/* container for right-side actions (Apply All / Delete All) */
+.pending-updates-header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* specific button variants */
+.btn-apply-all {
+  background:#4caf50;
+  color: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.btn-delete-all {
+  background:#f44336;
+  color: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* subtle hover / focus states */
+.pending-updates-header .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.pending-updates-header .btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.12);
+}
+
+/* responsive: wrap actions on very narrow sidebars */
+@media (max-width: 420px) {
+  .pending-updates-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+  .pending-updates-header-actions {
+    justify-content: flex-end;
+  }
+}
+
+.pending-updates-sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+  margin-right: auto; /* keep sort controls to the left of right-side actions */
+  padding: 2px 4px;
+}
+
+.pending-updates-sort .sort-label {
+  font-size: 0.82rem;
+  color: var(--jp-ui-font-color2, #6b6b6b);
+  white-space: nowrap;
+}
+
+/* Reuse .btn small sizing but add toggle visuals */
+.btn.btn-sort-time,
+.btn.btn-sort-cell {
+  min-width: 56px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--jp-ui-font-color1, #222);
+  transition: background-color 140ms ease, transform 100ms ease,
+    box-shadow 120ms ease, border-color 120ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.82rem;
+}
+
+/* Hover / focus affordances */
+.btn.btn-sort-time:hover,
+.btn.btn-sort-cell:hover {
+  background-color: rgba(25, 118, 210, 0.06);
+  transform: translateY(-1px);
+  border-color: rgba(25, 118, 210, 0.14);
+}
+
+.btn.btn-sort-time:focus,
+.btn.btn-sort-cell:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.10);
+}
+
+/* Active state: visually distinct and accessible for toggled sort key */
+.btn.btn-sort-time.active,
+.btn.btn-sort-cell.active {
+  background: linear-gradient(180deg, rgba(25,118,210,0.12), rgba(25,118,210,0.06));
+  border-color: rgba(25, 118, 210, 0.22);
+  color: var(--jp-layout-color1, #0b57a4);
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(9, 105, 218, 0.08);
+}
+
+/* Provide small caret visuals using pseudo elements */
+.btn.btn-sort-time::after,
+.btn.btn-sort-cell::after {
+  content: "";
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 4px;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid currentColor;
+  opacity: 0.6;
+  transform-origin: center;
+  transition: transform 140ms ease, opacity 140ms ease;
+}
+
+/* When active, rotate the caret to indicate chosen sort mode (subtle) */
+.btn.active::after {
+  transform: rotate(180deg) translateY(1px);
+  opacity: 1;
+}
+
+/* Compact layout for narrow sidebars */
+@media (max-width: 420px) {
+  .pending-updates-sort {
+    margin: 6px 0;
+    width: 100%;
+    justify-content: flex-start;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .btn.btn-sort-time,
+  .btn.btn-sort-cell {
+    min-width: 48%;
+    flex: 1 1 48%;
+  }
+}
+
+/* Sorting controls for Pending Updates */
+.pending-updates-sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+  margin-right: auto; /* keep sort controls to the left of right-side actions */
+  padding: 2px 4px;
+}
+
+.pending-updates-sort .sort-label {
+  font-size: 0.82rem;
+  color: var(--jp-ui-font-color2, #6b6b6b);
+  white-space: nowrap;
+}
+
+/* Reuse .btn small sizing but add toggle visuals */
+.btn.btn-sort-time,
+.btn.btn-sort-cell {
+  min-width: 56px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--jp-ui-font-color1, #222);
+  transition: background-color 140ms ease, transform 100ms ease,
+    box-shadow 120ms ease, border-color 120ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.82rem;
+}
+
+/* Hover / focus affordances */
+.btn.btn-sort-time:hover,
+.btn.btn-sort-cell:hover {
+  background-color: rgba(25, 118, 210, 0.06);
+  transform: translateY(-1px);
+  border-color: rgba(25, 118, 210, 0.14);
+}
+
+.btn.btn-sort-time:focus,
+.btn.btn-sort-cell:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.10);
+}
+
+/* Active state: visually distinct and accessible for toggled sort key */
+.btn.btn-sort-time.active,
+.btn.btn-sort-cell.active {
+  background: linear-gradient(180deg, rgba(25,118,210,0.12), rgba(25,118,210,0.06));
+  border-color: rgba(25, 118, 210, 0.22);
+  color: var(--jp-layout-color1, #0b57a4);
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(9, 105, 218, 0.08);
+}
+
+/* Provide small caret visuals using pseudo elements */
+.btn.btn-sort-time::after,
+.btn.btn-sort-cell::after {
+  content: "";
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 4px;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid currentColor;
+  opacity: 0.6;
+  transform-origin: center;
+  transition: transform 140ms ease, opacity 140ms ease;
+}
+
+/* When active, rotate the caret to indicate chosen sort mode (subtle) */
+.btn.active::after {
+  transform: rotate(180deg) translateY(1px);
+  opacity: 1;
+}
+
+/* Compact layout for narrow sidebars */
+@media (max-width: 420px) {
+  .pending-updates-sort {
+    margin: 6px 0;
+    width: 100%;
+    justify-content: flex-start;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .btn.btn-sort-time,
+  .btn.btn-sort-cell {
+    min-width: 48%;
+    flex: 1 1 48%;
+  }
+}
+
+/* Enhanced styling for the Pending Updates dropdown (used by PendingUpdatesSidebar) */
+.pending-updates-sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+  margin-right: auto;
+  padding: 2px 4px;
+}
+
+.pending-updates-sort .sort-label {
+  font-size: 0.82rem;
+  color: var(--jp-ui-font-color2, #6b6b6b);
+  white-space: nowrap;
+  margin-right: 6px;
+}
+
+/* Visually nicer select input */
+.pending-updates-sort-select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding: 6px 36px 6px 10px; /* space for caret on the right */
+  min-width: 130px;
+  border-radius: 8px;
+  border: 1px solid var(--jp-border-color1, rgba(0,0,0,0.08));
+  background-color: var(--jp-layout-color2, #f5f6f8);
+  color: var(--jp-inverse-layout-color1, #222);
+  font-size: 0.9rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: box-shadow 120ms ease, border-color 120ms ease,
+    transform 100ms ease;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M0 0 L10 0 L5 6 Z' fill='%236b6b6b'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 10px 6px;
+  box-sizing: border-box;
+}
+
+/* Focus and hover affordances */
+.pending-updates-sort-select:hover {
+  transform: translateY(-1px);
+}
+
+.pending-updates-sort-select:focus {
+  outline: none;
+  border-color: var(--jp-brand-color1, #1976d2);
+  box-shadow: 0 0 0 4px rgba(25,118,210,0.08);
+}
+
+/* Smaller / compact look in narrow sidebars */
+@media (max-width: 420px) {
+  .pending-updates-sort {
+    margin: 6px 0;
+    width: 100%;
+    justify-content: flex-start;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .pending-updates-sort-select {
+    min-width: 100%;
+    padding-right: 12px;
+    background-position: right 12px center;
+  }
+
+  .pending-updates-sort .sort-label {
+    flex-basis: 100%;
+  }
+}
+
+/* Ensure header can wrap and actions float to the right */
+.pending-updates-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap; /* allow items to wrap to a new row */
+}
+
+/* Keep actions aligned to the right on wide viewports */
+.pending-updates-header-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* When the panel becomes narrow, move the actions to a second row */
+@media (max-width: 520px) {
+  .pending-updates-header {
+    align-items: flex-start;
+  }
+
+  /* Keep sort controls on the first row; allow them to shrink */
+  .pending-updates-sort {
+    order: 1;
+    flex: 1 1 60%;
+    min-width: 140px;
+  }
+
+  /* Put the action buttons on their own row, right aligned */
+  .pending-updates-header-actions {
+    order: 2;
+    flex: 1 1 100%;
+    justify-content: flex-end;
+    margin-left: 0;
+    padding-top: 6px;
+  }
+}
+
+/* Connected Teammates Section */
+.connected-teammates-section {
+  border-bottom: 1px solid var(--jp-border-color2, #e6e6e6);
+  padding: 12px;
+}
+
+.connected-teammates-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.connected-teammates-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--jp-ui-font-color1, #222);
+}
+
+.connected-teammates-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: var(--jp-ui-font-color2, #6b6b6b);
+}
+
+.connected-teammate-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: var(--jp-layout-color0, #fff);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 6px;
+}
+
+.teammate-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.teammate-status-dot.online {
+  background-color: #4caf50;
+  box-shadow: 0 0 4px rgba(76, 175, 80, 0.5);
+}
+
+.teammate-status-dot.offline {
+  background-color: #9e9e9e;
+}
+
+.teammate-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--jp-ui-font-color1, #222);
+}
+
+/* Filter Section */
+.pending-updates-filter-section {
+  border-bottom: 1px solid var(--jp-border-color2, #e6e6e6);
+  padding: 10px 12px;
+}
+
+.pending-updates-filter-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pending-updates-filter-title {
+  font-size: 0.85rem;
+  color: var(--jp-ui-font-color2, #6b6b6b);
+  white-space: nowrap;
+}
+
+.pending-updates-filter-select {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  border: 1px solid var(--jp-border-color1, #ccc);
+  border-radius: 6px;
+  background: var(--jp-layout-color0, #fff);
+  color: var(--jp-ui-font-color1, #222);
+  cursor: pointer;
+}
+
+.pending-updates-filter-select:focus {
+  outline: none;
+  border-color: var(--jp-brand-color1, #1976d2);
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+}
+
+/* Teammate filter list (checkboxes) */
+.teammate-filter-list {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 8px;
+  background: var(--jp-layout-color1, #f5f5f5);
+  border-radius: 6px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.teammate-filter-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.teammate-filter-checkbox-row input[type="checkbox"] {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}
+
+.teammate-filter-checkbox-row label {
+  font-size: 0.85rem;
+  color: var(--jp-ui-font-color1, #222);
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Sender Badge */
+.pending-update-sender-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 12px;
+  white-space: nowrap;
+  margin-left: 8px;
+}
+
+.pending-update-sender-badge.sender-teacher {
+  background-color: #e3f2fd;
+  color: #1565c0;
+  border: 1px solid #90caf9;
+}
+
+.pending-update-sender-badge.sender-teammate {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+  border: 1px solid #ce93d8;
+}
+
+/* Adjust top row layout to accommodate sender badge */
+.pending-update-top {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pending-update-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+
+/* Responsive adjustments for filter */
+@media (max-width: 420px) {
+  .pending-updates-filter-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .pending-updates-filter-select {
+    width: 100%;
+  }
+  
+  .pending-update-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .pending-update-actions {
+    margin-left: 0;
+    margin-top: 8px;
+  }
+}
+
+/* ========================================
+   Teammate Location Tracker Styles
+   ======================================== */
+
+.teammate-location-sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--jp-layout-color1, #fff);
+  font-family: var(--jp-ui-font-family);
+}
+
+.teammate-location-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.teammate-location-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--jp-border-color1, #e0e0e0);
+  background: linear-gradient(180deg, #f8f9fa, #fff);
+}
+
+.teammate-location-header-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.teammate-location-header h3 {
+  margin: 0 0 4px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--jp-ui-font-color1, #333);
+}
+
+.teammate-location-count {
+  font-size: 0.75rem;
+  color: var(--jp-ui-font-color2, #666);
+}
+
+.teammate-location-refresh-btn {
+  background: var(--jp-layout-color2, #f5f5f5);
+  border: 1px solid var(--jp-border-color1, #e0e0e0);
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 150ms ease;
+}
+
+.teammate-location-refresh-btn:hover {
+  background: var(--jp-layout-color3, #e0e0e0);
+}
+
+/* Info message for connected teammates waiting for locations */
+.teammate-location-info {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  background: var(--jp-info-color3, #cce5ff);
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: var(--jp-info-color0, #004085);
+}
+
+/* Info message for teammates without location */
+.teammate-location-no-location-info {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  background: var(--jp-warn-color3, #fff3cd);
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: var(--jp-warn-color0, #856404);
+}
+
+/* Has teammates indicator */
+.teammate-location-toc-item.has-teammates {
+  background-color: rgba(76, 175, 80, 0.1);
+  border-left: 3px solid #4caf50;
+}
+
+.teammate-location-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.teammate-location-empty {
+  text-align: center;
+  color: var(--jp-ui-font-color2, #666);
+  padding: 20px;
+  font-style: italic;
+}
+
+/* TOC List Styles */
+.teammate-location-toc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.teammate-location-toc-item {
+  display: flex;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 4px;
+  margin: 2px 0;
+  transition: background-color 150ms ease;
+  cursor: pointer;
+}
+
+.teammate-location-toc-item:hover {
+  background-color: var(--jp-layout-color2, #f0f0f0);
+}
+
+/* Indentation based on heading level */
+.teammate-location-toc-item.level-1 {
+  padding-left: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.teammate-location-toc-item.level-2 {
+  padding-left: 20px;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.teammate-location-toc-item.level-3 {
+  padding-left: 32px;
+  font-size: 0.88rem;
+}
+
+.teammate-location-toc-item.level-4 {
+  padding-left: 44px;
+  font-size: 0.85rem;
+}
+
+.teammate-location-toc-item.level-5 {
+  padding-left: 56px;
+  font-size: 0.83rem;
+}
+
+.teammate-location-toc-item.level-6 {
+  padding-left: 68px;
+  font-size: 0.82rem;
+}
+
+.teammate-location-toc-item.level-7 {
+  padding-left: 20px;
+  font-size: 0.82rem;
+  color: var(--jp-ui-font-color2, #666);
+}
+
+/* Code cell styling */
+.teammate-location-toc-item.type-code {
+  font-family: var(--jp-code-font-family, monospace);
+  background-color: var(--jp-layout-color2, #f5f5f5);
+  border-left: 3px solid var(--jp-brand-color1, #1976d2);
+}
+
+.teammate-location-toc-item.type-code:hover {
+  background-color: var(--jp-layout-color3, #e8e8e8);
+}
+
+/* Markdown cell styling */
+.teammate-location-toc-item.type-markdown {
+  font-style: italic;
+}
+
+/* TOC text */
+.teammate-location-toc-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Teammate indicators */
+.teammate-location-indicators {
+  display: flex;
+  gap: 4px;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.teammate-location-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  cursor: help;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: transform 150ms ease;
+}
+
+.teammate-location-dot:hover {
+  transform: scale(1.3);
+}
+
+/* Legend section */
+.teammate-location-legend {
+  padding: 12px 16px;
+  border-top: 1px solid var(--jp-border-color1, #e0e0e0);
+  background: var(--jp-layout-color2, #f5f5f5);
+}
+
+.teammate-location-legend h4 {
+  margin: 0 0 8px 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--jp-ui-font-color1, #333);
+}
+
+.teammate-location-legend-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.teammate-location-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: var(--jp-layout-color1, #fff);
+  border-radius: 12px;
+  font-size: 0.75rem;
+  color: var(--jp-ui-font-color2, #666);
+  border: 1px solid var(--jp-border-color1, #e0e0e0);
+}
+/* ...existing code... */

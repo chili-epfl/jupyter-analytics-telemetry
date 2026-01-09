@@ -10,6 +10,10 @@ export namespace Selectors {
   export const notebookId = `${SELECTOR_ID}_notebook_id`;
 
   export const cellMapping = `${SELECTOR_ID}_cell_mapping`;
+
+  export const pendingUpdates = `${SELECTOR_ID}_pending_updates`;
+
+  export const updatedCells = `${SELECTOR_ID}_updated_cells`;
 }
 
 export namespace CommandIDs {

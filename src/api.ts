@@ -7,6 +7,7 @@ import {
   ICodeExecObject,
   INotebookClickObject,
   IMarkdownExecObject,
+  IPendingUpdateInteractionObject,
   PostDataObject
 } from './utils/types';
 
@@ -68,4 +69,10 @@ export const postCellAlteration = (
   cellAlteration: ICellAlterationObject
 ): void => {
   postRequest(cellAlteration, 'alter');
+};
+
+export const postPendingUpdateInteraction = (
+  interaction: IPendingUpdateInteractionObject
+): void => {
+  postRequest(interaction, 'pending_update_interaction');
 };

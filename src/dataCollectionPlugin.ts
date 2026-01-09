@@ -1,15 +1,19 @@
 import { JupyterFrontEnd, LabShell } from '@jupyterlab/application';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { NotebookPanel } from '@jupyterlab/notebook';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { shareIcon } from '@jupyterlab/ui-components';
-
+import { PERSISTENT_USER_ID } from '.';
 import { PanelManager } from './PanelManager';
-import { APP_ID, CommandIDs } from './utils/constants';
 import { CompatibilityManager } from './utils/compatibility';
-import { Selectors } from './utils/constants';
+import { APP_ID, CommandIDs, Selectors } from './utils/constants';
+import { bindRenderPendingUpdatesWidget, bindRequestCurrentPanel, createPendingUpdatesSidebar, getConnectedTeammates, groupShareFlags, PendingUpdatesSidebar } from './utils/notebookSync';
+import { TeammateLocationSidebar } from './utils/teammateLocationTracker';
 import { getOrigCellMapping } from './utils/utils';
-import { groupShareFlags, getConnectedTeammates } from './utils/notebookSync';
+import { ITeammateLocation } from './websocket/WebsocketManager';
 
+let pendingSidebar: PendingUpdatesSidebar | null = null;
+let locationSidebar: TeammateLocationSidebar | null = null;
+let isPluginActivated = false;
 const LOCAL_URL = 'http://localhost:1015';
 export let BACKEND_API_URL = LOCAL_URL + '/send/';
 export let WEBSOCKET_API_URL = LOCAL_URL;
@@ -18,6 +22,13 @@ export const dataCollectionPlugin = async (
   app: JupyterFrontEnd,
   settingRegistry: ISettingRegistry
 ) => {
+  // Prevent multiple activations
+  if (isPluginActivated) {
+    console.log(`${APP_ID}: Plugin already activated, skipping...`);
+    return;
+  }
+  isPluginActivated = true;
+
   // to record duration of code executions, enable the recording of execution timing (JupyterLab default setting)
   settingRegistry
     .load('@jupyterlab/notebook-extension:tracker')
@@ -43,9 +54,92 @@ export const dataCollectionPlugin = async (
     onEndpointChanged(endpointSettings);
     endpointSettings.changed.connect(onEndpointChanged);
 
+    // create the pending updates sidebar widget (only if not already created)
+    if (!pendingSidebar) {
+      pendingSidebar = createPendingUpdatesSidebar();
+      // Binds the instance of PendingUpdatesSidebar with this function.
+      bindRenderPendingUpdatesWidget(pendingSidebar);
+      // rank controls position among right widgets; pick a sensible rank
+      app.shell.add(pendingSidebar, 'right', { rank: 600 });
+    }
+
+    // Create the teammate location sidebar (only if not already created)
+    if (!locationSidebar) {
+      locationSidebar = new TeammateLocationSidebar();
+
+      // IMPORTANT: Set up fetch callback BEFORE adding to shell
+      locationSidebar.setFetchTeammateLocationsCallback(async (notebookId: string) => {
+        console.log(`${APP_ID}: Fetch callback invoked for notebook:`, notebookId);
+        if (!PERSISTENT_USER_ID) {
+          console.log(`${APP_ID}: No PERSISTENT_USER_ID`);
+          return [];
+        }
+        try {
+          const params = new URLSearchParams({
+            userId: PERSISTENT_USER_ID,
+            notebookId: notebookId
+          });
+          const url = `${WEBSOCKET_API_URL}/groups/location/teammates?${params}`;
+          console.log(`${APP_ID}: Fetching teammate locations from:`, url);
+
+          const response = await fetch(url);
+          console.log(`${APP_ID}: Response status:`, response.status);
+
+          if (response.ok) {
+            const data = await response.json();
+            console.log(`${APP_ID}: Fetched teammate locations:`, data);
+            return data || [];
+          } else {
+            console.error(`${APP_ID}: Response not OK:`, response.status);
+          }
+        } catch (error) {
+          console.error(`${APP_ID}: Failed to fetch teammate locations:`, error);
+        }
+        return [];
+      });
+
+      app.shell.add(locationSidebar, 'left', { rank: 650 });
+    }
+
+
     const panelManager = new PanelManager(settings, dialogShownSettings);
+    bindRequestCurrentPanel(() => panelManager.panel);
+
+    // Wire up teammate change callback to refresh sidebar
+    panelManager.onTeammateChange = () => {
+      console.log(`${APP_ID}: Teammate change detected, refreshing sidebars`);
+      if (pendingSidebar) {
+        pendingSidebar.refreshTeammates();
+      }
+      if (locationSidebar) {
+        locationSidebar.refresh();
+      }
+    };
+
+    // Wire up location tracking callbacks
+    panelManager.websocketManager.onLocationUpdate((location: ITeammateLocation) => {
+      console.log(`${APP_ID}: Location update received:`, location);
+      if (locationSidebar) {
+        locationSidebar.updateTeammateLocation(location);
+      }
+    });
+
+    panelManager.websocketManager.onLocationCleared((userId: string) => {
+      console.log(`${APP_ID}: Location cleared for user:`, userId);
+      if (locationSidebar) {
+        locationSidebar.removeTeammateLocation(userId);
+      }
+    });
+
+    // Wire up cell change callback to send location updates
+    panelManager.onCellChange = (cellId: string, cellIndex: number) => {
+      console.log(`${APP_ID}: onCellChange callback triggered:`, { cellId, cellIndex });
+      panelManager.websocketManager.sendLocationUpdate(cellId, cellIndex);
+    };
+    console.log(`${APP_ID}: Cell change callback registered on panelManager`);
 
     const labShell = app.shell as LabShell;
+    labShell.add(pendingSidebar, 'right', { rank: 500 });
 
     // update the panel when the active widget changes
     if (labShell) {
@@ -110,9 +204,10 @@ const pushCellUpdate = async (panelManager: PanelManager) => {
 
     const payload = {
       content: minimalCell,
-      action: 'update_cell'
+      action: 'update_cell',
+      update_id: crypto.randomUUID(), // Generate unique update ID
     };
-
+    console.log("Awaiting pusUpdateToTeammates")
     await pushUpdateToTeammates(panelManager, JSON.stringify(payload));
   }
 };
@@ -125,21 +220,27 @@ const pushUpdateToTeammates = async (
     console.error('No websocket manager found');
     return;
   }
-
+  console.log("Sending Message")
   const notebookId = CompatibilityManager.getMetadataComp(
     panelManager.panel?.context.model,
     Selectors.notebookId
   );
+
+  console.log("Sending Message")
+
   const teammateList = getConnectedTeammates(notebookId);
+  console.log("Sending Message")
 
   if ((await teammateList).length === 0) {
     console.log('No connected teammates');
     return;
   }
 
+
   for (const userId of await teammateList) {
     panelManager.websocketManager.sendMessageToTeammates(userId, message);
   }
+
 };
 
 function onEndpointChanged(settings: ISettingRegistry.ISettings) {
@@ -167,7 +268,35 @@ function onConnect(labShell: LabShell, panelManager: PanelManager) {
   if (widget instanceof NotebookPanel) {
     const notebookPanel = widget as NotebookPanel;
     panelManager.panel = notebookPanel;
+    console.log(`${APP_ID}: onConnect - NotebookPanel detected`);
+
+    try {
+      (pendingSidebar as PendingUpdatesSidebar).setCurrentPanel(panelManager.panel);
+    } catch (e) {
+      console.error('Failed to update pending sidebar panel', e);
+    }
+    try {
+      if (locationSidebar) {
+        console.log(`${APP_ID}: Setting notebook panel on location sidebar`);
+        locationSidebar.setNotebookPanel(panelManager.panel);
+      }
+    } catch (e) {
+      console.error('Failed to update location sidebar panel', e);
+    }
+
   } else {
     panelManager.panel = null;
+    try {
+      (pendingSidebar as PendingUpdatesSidebar).setCurrentPanel(null);
+    } catch (e) {
+      console.error('Failed to clear pending sidebar panel', e);
+    }
+    try {
+      if (locationSidebar) {
+        locationSidebar.setNotebookPanel(null);
+      }
+    } catch (e) {
+      console.error('Failed to clear location sidebar panel', e);
+    }
   }
 }
