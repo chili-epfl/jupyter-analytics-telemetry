@@ -6,10 +6,11 @@ import { AlterationDisposable } from './trackers/AlterationDisposable';
 import { CellMappingDisposable } from './trackers/CellMappingDisposable';
 import { ExecutionDisposable } from './trackers/ExecutionDisposable';
 import { FocusDisposable } from './trackers/FocusDisposable';
-import { APP_ID, EXTENSION_SETTING_NAME } from './utils/constants';
+import { CompatibilityManager } from './utils/compatibility';
+import { APP_ID, EXTENSION_SETTING_NAME, Selectors } from './utils/constants';
 import {
-  checkGroupSharePermission,
-  handleSyncMessage
+    checkGroupSharePermission,
+    handleSyncMessage
 } from './utils/notebookSync';
 import { isNotebookValid } from './utils/utils';
 import { WebsocketManager } from './websocket/WebsocketManager';
@@ -154,14 +155,25 @@ export class PanelManager {
             // Set up cell change listener for location tracking
             if (this._panel && this._onCellChangeCallback) {
               const notebook = this._panel.content;
+              const panel = this._panel;
               console.log(`${APP_ID}: Setting up cell change listener for location tracking`);
               this._cellChangeHandler = () => {
                 const activeCell = notebook.activeCell;
                 if (activeCell && this._onCellChangeCallback) {
                   const cellId = activeCell.model.id;
                   const cellIndex = notebook.activeCellIndex;
-                  console.log(`${APP_ID}: Cell changed, calling onCellChange callback:`, { cellId, cellIndex });
-                  this._onCellChangeCallback(cellId, cellIndex);
+                  
+                  // Get orig_cell_id from cell mapping
+                  const cellMapping: [string, string][] | null | undefined =
+                    CompatibilityManager.getMetadataComp(
+                      panel.context.model,
+                      Selectors.cellMapping
+                    );
+                  const mapping = cellMapping?.find(([key]) => key === cellId);
+                  const origCellId = mapping ? mapping[1] : cellId;
+                  
+                  console.log(`${APP_ID}: Cell changed, calling onCellChange callback:`, { cellId, origCellId, cellIndex });
+                  this._onCellChangeCallback(origCellId, cellIndex);
                 }
               };
               notebook.activeCellChanged.connect(this._cellChangeHandler);

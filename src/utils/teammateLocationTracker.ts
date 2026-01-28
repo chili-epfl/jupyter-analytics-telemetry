@@ -1,9 +1,9 @@
-import { Widget } from '@lumino/widgets';
 import { Cell, MarkdownCell } from '@jupyterlab/cells';
 import { NotebookPanel } from '@jupyterlab/notebook';
-import { APP_ID, Selectors } from './constants';
+import { Widget } from '@lumino/widgets';
 import { ITeammateLocation } from '../websocket/WebsocketManager';
 import { CompatibilityManager } from './compatibility';
+import { APP_ID, Selectors } from './constants';
 import { getConnectedTeammates } from './notebookSync';
 
 /**
@@ -13,6 +13,7 @@ interface IHeading {
     text: string;
     level: number;
     cellId: string;
+    origCellId: string; // The original cell ID for matching with teammate locations
     cellIndex: number;
     type: 'header' | 'markdown' | 'code';
 }
@@ -224,11 +225,22 @@ export class TeammateLocationSidebar extends Widget {
             return;
         }
 
+        // Get the cell mapping to resolve orig_cell_ids
+        const cellMapping: [string, string][] | null | undefined =
+            CompatibilityManager.getMetadataComp(
+                this._notebookPanel.context.model,
+                Selectors.cellMapping
+            );
+
         const notebook = this._notebookPanel.content;
         for (let i = 0; i < notebook.widgets.length; i++) {
             const cell: Cell = notebook.widgets[i];
             const model = cell.model;
             const cellId = model.id;
+
+            // Find the orig_cell_id from the mapping
+            const mapping = cellMapping?.find(([key]) => key === cellId);
+            const origCellId = mapping ? mapping[1] : cellId;
 
             if (model.type === 'markdown') {
                 const mcell = cell as MarkdownCell;
@@ -245,6 +257,7 @@ export class TeammateLocationSidebar extends Widget {
                             text,
                             level,
                             cellId,
+                            origCellId,
                             cellIndex: i,
                             type: 'header'
                         });
@@ -262,6 +275,7 @@ export class TeammateLocationSidebar extends Widget {
                         text: firstLine + (source.length > 50 ? '...' : ''),
                         level: 7, // Lower level than headers
                         cellId,
+                        origCellId,
                         cellIndex: i,
                         type: 'markdown'
                     });
@@ -275,6 +289,7 @@ export class TeammateLocationSidebar extends Widget {
                         text: `[${i + 1}] ${firstLine}${source.length > 40 ? '...' : ''}`,
                         level: 7,
                         cellId,
+                        origCellId,
                         cellIndex: i,
                         type: 'code'
                     });
@@ -284,12 +299,28 @@ export class TeammateLocationSidebar extends Widget {
     }
 
     /**
-     * Get teammates at a specific cell
+     * Get teammates at a specific cell (matches by orig_cell_id)
+     * Only returns teammates if this heading is the last one with this origCellId
+     * (to avoid showing on both original and "Your Code" cells)
      */
-    private _getTeammatesAtCell(cellId: string): string[] {
+    private _getTeammatesAtCell(heading: IHeading): string[] {
+        // Find all headings with the same origCellId
+        const headingsWithSameOrigId = this._headings.filter(
+            h => h.origCellId === heading.origCellId
+        );
+        
+        // Only show teammates on the last heading with this origCellId
+        // This ensures that if "Your Code" exists, only it gets highlighted
+        // If it doesn't exist, the original cell gets highlighted
+        const lastHeading = headingsWithSameOrigId[headingsWithSameOrigId.length - 1];
+        if (heading.cellId !== lastHeading.cellId) {
+            return [];
+        }
+        
         const teammates: string[] = [];
         this._teammateLocations.forEach((loc, userId) => {
-            if (loc.cellId === cellId) {
+            // Compare using orig_cell_id for proper matching
+            if (loc.cellId === heading.origCellId) {
                 teammates.push(userId);
             }
         });
@@ -376,8 +407,9 @@ export class TeammateLocationSidebar extends Widget {
             textSpan.textContent = heading.text;
             textSpan.onclick = () => this._scrollToCell(heading.cellIndex);
 
-            // Check for teammates at this cell
-            const teammatesAtCell = this._getTeammatesAtCell(heading.cellId);
+            // Check for teammates at this cell - use origCellId for matching
+            // Only shows on the last cell with this origCellId (the "Your Code" cell if it exists)
+            const teammatesAtCell = this._getTeammatesAtCell(heading);
 
             // Create teammates indicator
             if (teammatesAtCell.length > 0) {
