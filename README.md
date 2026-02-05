@@ -10,6 +10,13 @@ This repository is part of the learning analytics system ([**Jupyter Analytics**
 
 - JupyterLab >= 3.1.0
 
+### Compatibility
+
+| Project Version | Tested With                 | Notes |
+|-----------------|-----------------------------|-------|
+| >= v5.0.0       | JupyterLab 4.x only          | JupyterLab 3.x not supported |
+| < v5.0.0        | JupyterLab 4.x and 3.x       | Deprecated compatibility |
+
 ## Install
 
 To install the extension, execute:
