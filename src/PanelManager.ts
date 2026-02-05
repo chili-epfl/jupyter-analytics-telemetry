@@ -1,18 +1,19 @@
+import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { NotebookPanel } from '@jupyterlab/notebook';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { Dialog, showDialog } from '@jupyterlab/apputils';
-import { WebsocketManager } from './websocket/WebsocketManager';
-import { isNotebookValid } from './utils/utils';
-import {
-  handleSyncMessage,
-  checkGroupSharePermission
-} from './utils/notebookSync';
-import { EXTENSION_SETTING_NAME } from './utils/constants';
+import { disabledNotebooksSignaler } from '.';
+import { AlterationDisposable } from './trackers/AlterationDisposable';
 import { CellMappingDisposable } from './trackers/CellMappingDisposable';
 import { ExecutionDisposable } from './trackers/ExecutionDisposable';
-import { AlterationDisposable } from './trackers/AlterationDisposable';
 import { FocusDisposable } from './trackers/FocusDisposable';
-import { disabledNotebooksSignaler } from '.';
+import { CompatibilityManager } from './utils/compatibility';
+import { APP_ID, EXTENSION_SETTING_NAME, Selectors } from './utils/constants';
+import {
+    checkGroupSharePermission,
+    handleSyncMessage
+} from './utils/notebookSync';
+import { isNotebookValid } from './utils/utils';
+import { WebsocketManager } from './websocket/WebsocketManager';
 
 export class PanelManager {
   constructor(
@@ -42,6 +43,16 @@ export class PanelManager {
 
   get websocketManager(): WebsocketManager {
     return this._websocketManager;
+  }
+
+  // Set callback for teammate changes (to update sidebar)
+  set onTeammateChange(callback: (() => void) | null) {
+    this._onTeammateChangeCallback = callback;
+  }
+
+  // Set callback for cell change (to send location updates)
+  set onCellChange(callback: ((cellId: string, cellIndex: number) => void) | null) {
+    this._onCellChangeCallback = callback;
   }
 
   get panel(): NotebookPanel | null {
@@ -125,15 +136,53 @@ export class PanelManager {
             // Establish the socket connection and pass the message handler
             this._websocketManager.establishSocketConnection(
               notebookId,
-              (message, sender) => {
+              (message, sender, senderType) => {
                 if (this._panel) {
-                  handleSyncMessage(this._panel, message, sender);
+                  handleSyncMessage(this._panel, message, sender, senderType);
                 }
               }
             );
 
+
+            // Register callback for teammate changes (if set)
+            if (this._onTeammateChangeCallback) {
+              this._websocketManager.onTeammateChange(this._onTeammateChangeCallback);
+            }
+
             // Check if the user has permission to push notebook changes
             checkGroupSharePermission(notebookId);
+
+            // Set up cell change listener for location tracking
+            if (this._panel && this._onCellChangeCallback) {
+              const notebook = this._panel.content;
+              const panel = this._panel;
+              console.log(`${APP_ID}: Setting up cell change listener for location tracking`);
+              this._cellChangeHandler = () => {
+                const activeCell = notebook.activeCell;
+                if (activeCell && this._onCellChangeCallback) {
+                  const cellId = activeCell.model.id;
+                  const cellIndex = notebook.activeCellIndex;
+                  
+                  // Get orig_cell_id from cell mapping
+                  const cellMapping: [string, string][] | null | undefined =
+                    CompatibilityManager.getMetadataComp(
+                      panel.context.model,
+                      Selectors.cellMapping
+                    );
+                  const mapping = cellMapping?.find(([key]) => key === cellId);
+                  const origCellId = mapping ? mapping[1] : cellId;
+                  
+                  console.log(`${APP_ID}: Cell changed, calling onCellChange callback:`, { cellId, origCellId, cellIndex });
+                  this._onCellChangeCallback(origCellId, cellIndex);
+                }
+              };
+              notebook.activeCellChanged.connect(this._cellChangeHandler);
+              console.log(`${APP_ID}: Cell change handler connected`);
+              // Send initial location
+              this._cellChangeHandler();
+            } else {
+              console.log(`${APP_ID}: Cannot set up cell change listener - panel: ${!!this._panel}, callback: ${!!this._onCellChangeCallback}`);
+            }
           }
         });
       }
@@ -189,6 +238,12 @@ export class PanelManager {
   private _disposeFromOptionalTrackers() {
     this._websocketManager.closeSocketConnection();
 
+    // Disconnect cell change handler
+    if (this._panel && this._cellChangeHandler) {
+      this._panel.content.activeCellChanged.disconnect(this._cellChangeHandler);
+      this._cellChangeHandler = null;
+    }
+
     if (this._executionDisposable) {
       this._executionDisposable.dispose();
       this._executionDisposable = null;
@@ -215,6 +270,9 @@ export class PanelManager {
   private _isDataCollectionEnabled: boolean;
   private _settings: ISettingRegistry.ISettings;
   private _dialogShownSettings: ISettingRegistry.ISettings;
+  private _onTeammateChangeCallback: (() => void) | null = null;
+  private _onCellChangeCallback: ((cellId: string, cellIndex: number) => void) | null = null;
+  private _cellChangeHandler: (() => void) | null = null;
 
   private _cellMappingDisposable: CellMappingDisposable | null = null;
   private _executionDisposable: ExecutionDisposable | null = null;
