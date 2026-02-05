@@ -21,7 +21,13 @@ export interface ICodeExecObject extends IBaseEvent {
 export interface IPendingUpdateInteractionObject extends IBaseEvent {
   cell_id?: string;
   update_id?: string;
-  action: 'UPDATE_NOW' | 'UPDATE_LATER' | 'UPDATE_ALL' | 'DELETE_ALL' | 'APPLY_SINGLE' | 'REMOVE_SINGLE';
+  action:
+    | 'UPDATE_NOW'
+    | 'UPDATE_LATER'
+    | 'UPDATE_ALL'
+    | 'DELETE_ALL'
+    | 'APPLY_SINGLE'
+    | 'REMOVE_SINGLE';
   sender?: string;
   sender_type?: 'teacher' | 'teammate';
   time: string;
@@ -40,7 +46,7 @@ interface IClick extends IBaseEvent {
   click_duration: number | null;
 }
 
-export interface INotebookClickObject extends IClick { }
+export interface INotebookClickObject extends IClick {}
 
 export interface ICellClickObject extends IClick {
   cell_id: string;

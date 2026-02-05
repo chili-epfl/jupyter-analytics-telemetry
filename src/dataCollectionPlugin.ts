@@ -6,7 +6,14 @@ import { PERSISTENT_USER_ID } from '.';
 import { PanelManager } from './PanelManager';
 import { CompatibilityManager } from './utils/compatibility';
 import { APP_ID, CommandIDs, Selectors } from './utils/constants';
-import { bindRenderPendingUpdatesWidget, bindRequestCurrentPanel, createPendingUpdatesSidebar, getConnectedTeammates, groupShareFlags, PendingUpdatesSidebar } from './utils/notebookSync';
+import {
+  bindRenderPendingUpdatesWidget,
+  bindRequestCurrentPanel,
+  createPendingUpdatesSidebar,
+  getConnectedTeammates,
+  groupShareFlags,
+  PendingUpdatesSidebar
+} from './utils/notebookSync';
 import { TeammateLocationSidebar } from './utils/teammateLocationTracker';
 import { getOrigCellMapping } from './utils/utils';
 import { ITeammateLocation } from './websocket/WebsocketManager';
@@ -68,46 +75,45 @@ export const dataCollectionPlugin = async (
       locationSidebar = new TeammateLocationSidebar();
 
       // IMPORTANT: Set up fetch callback BEFORE adding to shell
-      locationSidebar.setFetchTeammateLocationsCallback(async (notebookId: string) => {
-        console.log(`${APP_ID}: Fetch callback invoked for notebook:`, notebookId);
-        if (!PERSISTENT_USER_ID) {
-          console.log(`${APP_ID}: No PERSISTENT_USER_ID`);
+      locationSidebar.setFetchTeammateLocationsCallback(
+        async (notebookId: string) => {
+          if (!PERSISTENT_USER_ID) {
+            console.log(`${APP_ID}: No PERSISTENT_USER_ID`);
+            return [];
+          }
+          try {
+            const params = new URLSearchParams({
+              userId: PERSISTENT_USER_ID,
+              notebookId: notebookId
+            });
+            const url = `${WEBSOCKET_API_URL}/groups/location/teammates?${params}`;
+
+            const response = await fetch(url);
+
+            if (response.ok) {
+              const data = await response.json();
+              return data || [];
+            } else {
+              console.error(`${APP_ID}: Response not OK:`, response.status);
+            }
+          } catch (error) {
+            console.error(
+              `${APP_ID}: Failed to fetch teammate locations:`,
+              error
+            );
+          }
           return [];
         }
-        try {
-          const params = new URLSearchParams({
-            userId: PERSISTENT_USER_ID,
-            notebookId: notebookId
-          });
-          const url = `${WEBSOCKET_API_URL}/groups/location/teammates?${params}`;
-          console.log(`${APP_ID}: Fetching teammate locations from:`, url);
-
-          const response = await fetch(url);
-          console.log(`${APP_ID}: Response status:`, response.status);
-
-          if (response.ok) {
-            const data = await response.json();
-            console.log(`${APP_ID}: Fetched teammate locations:`, data);
-            return data || [];
-          } else {
-            console.error(`${APP_ID}: Response not OK:`, response.status);
-          }
-        } catch (error) {
-          console.error(`${APP_ID}: Failed to fetch teammate locations:`, error);
-        }
-        return [];
-      });
+      );
 
       app.shell.add(locationSidebar, 'left', { rank: 650 });
     }
-
 
     const panelManager = new PanelManager(settings, dialogShownSettings);
     bindRequestCurrentPanel(() => panelManager.panel);
 
     // Wire up teammate change callback to refresh sidebar
     panelManager.onTeammateChange = () => {
-      console.log(`${APP_ID}: Teammate change detected, refreshing sidebars`);
       if (pendingSidebar) {
         pendingSidebar.refreshTeammates();
       }
@@ -117,15 +123,15 @@ export const dataCollectionPlugin = async (
     };
 
     // Wire up location tracking callbacks
-    panelManager.websocketManager.onLocationUpdate((location: ITeammateLocation) => {
-      console.log(`${APP_ID}: Location update received:`, location);
-      if (locationSidebar) {
-        locationSidebar.updateTeammateLocation(location);
+    panelManager.websocketManager.onLocationUpdate(
+      (location: ITeammateLocation) => {
+        if (locationSidebar) {
+          locationSidebar.updateTeammateLocation(location);
+        }
       }
-    });
+    );
 
     panelManager.websocketManager.onLocationCleared((userId: string) => {
-      console.log(`${APP_ID}: Location cleared for user:`, userId);
       if (locationSidebar) {
         locationSidebar.removeTeammateLocation(userId);
       }
@@ -133,10 +139,8 @@ export const dataCollectionPlugin = async (
 
     // Wire up cell change callback to send location updates
     panelManager.onCellChange = (cellId: string, cellIndex: number) => {
-      console.log(`${APP_ID}: onCellChange callback triggered:`, { cellId, cellIndex });
       panelManager.websocketManager.sendLocationUpdate(cellId, cellIndex);
     };
-    console.log(`${APP_ID}: Cell change callback registered on panelManager`);
 
     const labShell = app.shell as LabShell;
     labShell.add(pendingSidebar, 'right', { rank: 500 });
@@ -205,9 +209,8 @@ const pushCellUpdate = async (panelManager: PanelManager) => {
     const payload = {
       content: minimalCell,
       action: 'update_cell',
-      update_id: crypto.randomUUID(), // Generate unique update ID
+      update_id: crypto.randomUUID() // Generate unique update ID
     };
-    console.log("Awaiting pusUpdateToTeammates")
     await pushUpdateToTeammates(panelManager, JSON.stringify(payload));
   }
 };
@@ -220,27 +223,22 @@ const pushUpdateToTeammates = async (
     console.error('No websocket manager found');
     return;
   }
-  console.log("Sending Message")
+
   const notebookId = CompatibilityManager.getMetadataComp(
     panelManager.panel?.context.model,
     Selectors.notebookId
   );
 
-  console.log("Sending Message")
-
   const teammateList = getConnectedTeammates(notebookId);
-  console.log("Sending Message")
 
   if ((await teammateList).length === 0) {
     console.log('No connected teammates');
     return;
   }
 
-
   for (const userId of await teammateList) {
     panelManager.websocketManager.sendMessageToTeammates(userId, message);
   }
-
 };
 
 function onEndpointChanged(settings: ISettingRegistry.ISettings) {
@@ -268,22 +266,21 @@ function onConnect(labShell: LabShell, panelManager: PanelManager) {
   if (widget instanceof NotebookPanel) {
     const notebookPanel = widget as NotebookPanel;
     panelManager.panel = notebookPanel;
-    console.log(`${APP_ID}: onConnect - NotebookPanel detected`);
 
     try {
-      (pendingSidebar as PendingUpdatesSidebar).setCurrentPanel(panelManager.panel);
+      (pendingSidebar as PendingUpdatesSidebar).setCurrentPanel(
+        panelManager.panel
+      );
     } catch (e) {
       console.error('Failed to update pending sidebar panel', e);
     }
     try {
       if (locationSidebar) {
-        console.log(`${APP_ID}: Setting notebook panel on location sidebar`);
         locationSidebar.setNotebookPanel(panelManager.panel);
       }
     } catch (e) {
       console.error('Failed to update location sidebar panel', e);
     }
-
   } else {
     panelManager.panel = null;
     try {
