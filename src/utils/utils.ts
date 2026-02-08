@@ -1,3 +1,4 @@
+import { ICellModel } from '@jupyterlab/cells';
 import { IOutput, MultilineString, IMimeBundle } from '@jupyterlab/nbformat';
 import { PartialJSONObject } from '@lumino/coreutils';
 import { NotebookPanel } from '@jupyterlab/notebook';
@@ -116,4 +117,20 @@ export const getOrigCellMapping = (panel: NotebookPanel): string[] => {
   }
 
   return cellMapping.map((row: string[]) => row[1]);
+};
+
+/**
+ * Sets the orig_cell_id for a cell explicitly.
+ * Useful when inserting cells that should share an orig_cell_id with another cell
+ * (e.g., when using insertAbove for "Your Code" cells).
+ */
+export const setOrigCellId = (
+  cellModel: ICellModel,
+  origCellId: string
+): void => {
+  CompatibilityManager.setMetadataComp(
+    cellModel,
+    Selectors.origCellId,
+    origCellId
+  );
 };

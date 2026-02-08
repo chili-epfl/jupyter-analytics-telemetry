@@ -7,7 +7,7 @@ import { postPendingUpdateInteraction } from '../api';
 import { WEBSOCKET_API_URL } from '../dataCollectionPlugin';
 import { CompatibilityManager } from './compatibility';
 import { APP_ID, Selectors } from './constants';
-import { getOrigCellMapping } from './utils';
+import { getOrigCellMapping, setOrigCellId} from './utils';
 
 // Sync action type constants
 const UPDATE_CELL_ACTION = 'update_cell';
@@ -61,6 +61,8 @@ const logPendingUpdateInteraction = (
     time: new Date().toISOString()
   });
 };
+
+
 
 // Function to handle the 'chat' message and trigger updates: Step 1
 export const handleSyncMessage = (
@@ -1188,7 +1190,7 @@ async function updateNotebookContent(
   cellId?: string,
   sender?: string,
   senderType?: 'teacher' | 'teammate',
-  skipLogging: boolean = false // Add parameter to skip logging
+  skipLogging: boolean = false
 ) {
   try {
     const cellUpdates =
@@ -1240,6 +1242,9 @@ async function updateNotebookContent(
           ? '# YOUR CODE\n\n'
           : '# YOUR CODE\n\n';
         newCellAbove.model.sharedModel.setSource(yourCodePrefix + existingSource);
+
+        // Explicitly set the orig_cell_id for the new "Your Code" cell to match the original cell's ID (cellUpdate.id), not the cell above it. This ensures both cells share the same orig_cell_id for proper mapping.
+        setOrigCellId(newCellAbove.model, cellUpdate.id);
 
         // Update the original cell (which is now at cellIndex + 1)
         const originalCell = notebook.widgets[cellIndex + 1];
