@@ -1,10 +1,11 @@
-import { Cell, MarkdownCell } from '@jupyterlab/cells';
+import { Cell } from '@jupyterlab/cells';
 import { NotebookPanel } from '@jupyterlab/notebook';
 import { Widget } from '@lumino/widgets';
 import { ITeammateLocation } from '../websocket/WebsocketManager';
 import { CompatibilityManager } from './compatibility';
 import { APP_ID, Selectors } from './constants';
 import { getConnectedTeammates } from './notebookSync';
+import { getOrigCellMapping } from './utils';
 
 /**
  * Interface for a heading in the TOC
@@ -225,12 +226,8 @@ export class TeammateLocationSidebar extends Widget {
             return;
         }
 
-        // Get the cell mapping to resolve orig_cell_ids
-        const cellMapping: [string, string][] | null | undefined =
-            CompatibilityManager.getMetadataComp(
-                this._notebookPanel.context.model,
-                Selectors.cellMapping
-            );
+        // Get the cell mapping using the utility function
+        const origCellMapping = getOrigCellMapping(this._notebookPanel);
 
         const notebook = this._notebookPanel.content;
         for (let i = 0; i < notebook.widgets.length; i++) {
@@ -238,12 +235,10 @@ export class TeammateLocationSidebar extends Widget {
             const model = cell.model;
             const cellId = model.id;
 
-            // Find the orig_cell_id from the mapping
-            const mapping = cellMapping?.find(([key]) => key === cellId);
-            const origCellId = mapping ? mapping[1] : cellId;
+            // Get the orig_cell_id from the mapping (falls back to cellId if not found)
+            const origCellId = origCellMapping[i] || cellId;
 
             if (model.type === 'markdown') {
-                const mcell = cell as MarkdownCell;
                 const source = model.sharedModel.getSource();
 
                 // Extract headers from markdown
