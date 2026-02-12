@@ -21,14 +21,22 @@ interface ISyncMessagePayload {
 // Helper Function to Log Interactions
 const logPendingUpdateInteraction = (
   panel: NotebookPanel,
-  action: 'UPDATE_NOW' | 'UPDATE_LATER' | 'UPDATE_ALL' | 'DELETE_ALL' | 'APPLY_SINGLE' | 'REMOVE_SINGLE',
+  action:
+    | 'UPDATE_NOW'
+    | 'UPDATE_LATER'
+    | 'UPDATE_ALL'
+    | 'DELETE_ALL'
+    | 'APPLY_SINGLE'
+    | 'REMOVE_SINGLE',
   cellId?: string,
   sender?: string,
   senderType?: 'teacher' | 'teammate',
   updateId?: string
 ) => {
   if (!PERSISTENT_USER_ID) {
-    console.warn(`${APP_ID}: Cannot log pending update interaction - no user ID`);
+    console.warn(
+      `${APP_ID}: Cannot log pending update interaction - no user ID`
+    );
     return;
   }
 
@@ -38,18 +46,11 @@ const logPendingUpdateInteraction = (
   );
 
   if (!notebookId) {
-    console.warn(`${APP_ID}: Cannot log pending update interaction - no notebook ID`);
+    console.warn(
+      `${APP_ID}: Cannot log pending update interaction - no notebook ID`
+    );
     return;
   }
-
-  console.log(`${APP_ID}: Logging pending update interaction`, {
-    action,
-    cellId,
-    sender,
-    senderType,
-    updateId,
-    notebookId
-  });
 
   postPendingUpdateInteraction({
     notebook_id: notebookId,
@@ -79,10 +80,9 @@ export const handleSyncMessage = (
 
   const jsonStr = message.slice(jsonStart);
   try {
-    const jsonParsed: ISyncMessagePayload & { update_id?: string } = JSON.parse(jsonStr);
+    const jsonParsed: ISyncMessagePayload & { update_id?: string } =
+      JSON.parse(jsonStr);
     const updateId = jsonParsed.update_id;
-
-    console.log(`${APP_ID}: Parsed sync message:`, jsonParsed);
 
     // Extract cell_id more thoroughly
     let cellId: string | undefined;
@@ -93,12 +93,15 @@ export const handleSyncMessage = (
         cellId = jsonParsed.content.id;
       } else if (jsonParsed.content.cell_id) {
         cellId = jsonParsed.content.cell_id;
-      } else if (jsonParsed.content.cells && Array.isArray(jsonParsed.content.cells) && jsonParsed.content.cells.length > 0) {
-        cellId = jsonParsed.content.cells[0].id || jsonParsed.content.cells[0].cell_id;
+      } else if (
+        jsonParsed.content.cells &&
+        Array.isArray(jsonParsed.content.cells) &&
+        jsonParsed.content.cells.length > 0
+      ) {
+        cellId =
+          jsonParsed.content.cells[0].id || jsonParsed.content.cells[0].cell_id;
       }
     }
-
-    console.log(`${APP_ID}: Extracted cellId: ${cellId}, updateId: ${updateId}`);
 
     if (jsonParsed.action === UPDATE_CELL_ACTION) {
       const contentJson = { cells: [jsonParsed.content] };
@@ -129,7 +132,9 @@ export const handleSyncMessage = (
 };
 
 // renderPendingUpdatesWidget: expose a renderer function that other modules can bind to the real sidebar
-export let renderPendingUpdatesWidget: (panel: NotebookPanel | null) => void = () => { };
+export let renderPendingUpdatesWidget: (
+  panel: NotebookPanel | null
+) => void = () => {};
 
 // add this binder so other modules can bind the real sidebar instance (Used to refresh to get the latest updates)
 export const bindRenderPendingUpdatesWidget = (
@@ -156,8 +161,7 @@ type IPendingUpdate = {
   senderType: 'teacher' | 'teammate'; // Type of sender for filtering
   updateId?: string; // The update_id from the push notification
   cellId?: string; // The actual cell_id from the update content
-}
-
+};
 
 /**
  * getPendingUpdates: Retrieves the Pending Updates from the Metadata
@@ -220,7 +224,6 @@ export const removePendingUpdate = (
   renderPendingUpdatesWidget(panel);
 };
 
-
 // applyPendingUpdate: Applying the Updates to the actual notebook
 export const applyPendingUpdate = async (
   panel: NotebookPanel,
@@ -235,9 +238,10 @@ export const applyPendingUpdate = async (
     // If not in pending object, try to extract from message
     if (!updateId || !cellId) {
       try {
-        const parsed = typeof pending.message === 'string'
-          ? JSON.parse(pending.message)
-          : pending.message;
+        const parsed =
+          typeof pending.message === 'string'
+            ? JSON.parse(pending.message)
+            : pending.message;
         updateId = updateId || parsed.update_id || undefined;
 
         // Extract cell_id if not already set
@@ -251,14 +255,23 @@ export const applyPendingUpdate = async (
           }
         }
       } catch (e) {
-        console.warn('Could not extract update_id or cell_id from pending update', e);
+        console.warn(
+          'Could not extract update_id or cell_id from pending update',
+          e
+        );
       }
     }
 
-    console.log(`${APP_ID}: Applying pending update with cellId: ${cellId}, updateId: ${updateId}`);
-
     // Apply the update - pass skipLogging to prevent double logging
-    await updateNotebookContent(panel, pending.message, updateId, cellId, pending.sender, pending.senderType, skipLogging);
+    await updateNotebookContent(
+      panel,
+      pending.message,
+      updateId,
+      cellId,
+      pending.sender,
+      pending.senderType,
+      skipLogging
+    );
 
     // remove it afterwards
     removePendingUpdate(panel, pending.id);
@@ -297,7 +310,6 @@ const markCellAsUpdated = (panel: NotebookPanel, cellId: string) => {
   }
 };
 
-
 // SETTING THE PENDING UPDATE SIDEBAR
 /**
  * - Listen to the change in notebook metadata (or model change) and signals a re-render when pending updates changes.
@@ -323,7 +335,8 @@ export class PendingUpdatesSidebar extends Widget {
       }
       // handle remove events from IObservableList
       if (change && change.type === 'remove') {
-        const oldIndex = typeof change.oldIndex === 'number' ? change.oldIndex : null;
+        const oldIndex =
+          typeof change.oldIndex === 'number' ? change.oldIndex : null;
         // run after microtask so model & widgets reflect removal
         setTimeout(() => {
           try {
@@ -343,14 +356,21 @@ export class PendingUpdatesSidebar extends Widget {
             }
             const updated = getUpdatedCells(panel);
             if (Array.isArray(updated) && updated.includes(belowId)) {
-              const newUpdated = updated.filter((id) => id !== belowId);
+              const newUpdated = updated.filter(id => id !== belowId);
               // write back to metadata using CompatibilityManager (same method used elsewhere)
-              CompatibilityManager.setMetadataComp(panel.context.model, Selectors.updatedCells, newUpdated);
+              CompatibilityManager.setMetadataComp(
+                panel.context.model,
+                Selectors.updatedCells,
+                newUpdated
+              );
               // refresh sidebar UI
               this.render();
             }
           } catch (err) {
-            console.warn('Error handling cell removal for updatedCells cleanup', err);
+            console.warn(
+              'Error handling cell removal for updatedCells cleanup',
+              err
+            );
           }
         }, 0);
       }
@@ -359,14 +379,12 @@ export class PendingUpdatesSidebar extends Widget {
     }
   };
 
-
   constructor() {
     super();
     this.id = 'unianalytics-pending-updates-sidebar';
     this.title.label = 'Pending updates';
     this.title.closable = true;
     this.addClass('unianalytics-pending-updates-sidebar');
-
 
     // header with refresh button
     const header = document.createElement('div');
@@ -441,7 +459,7 @@ export class PendingUpdatesSidebar extends Widget {
       for (const u of updates) {
         await applyPendingUpdate(this._currentPanel, u, true); // Pass true to skip logging
       }
-      this.render()
+      this.render();
     };
 
     const deleteAllBtn = document.createElement('button');
@@ -477,7 +495,7 @@ export class PendingUpdatesSidebar extends Widget {
       setPendingUpdates(this._currentPanel, remainingUpdates);
       renderPendingUpdatesWidget(this._currentPanel);
       this.render();
-    }
+    };
 
     header.appendChild(refreshBtn);
     header.appendChild(sortContainer);
@@ -520,7 +538,11 @@ export class PendingUpdatesSidebar extends Widget {
     filterSelect.value = this._filterMode;
 
     filterSelect.addEventListener('change', () => {
-      this._filterMode = filterSelect.value as 'all' | 'teacher' | 'teammates' | 'selected';
+      this._filterMode = filterSelect.value as
+        | 'all'
+        | 'teacher'
+        | 'teammates'
+        | 'selected';
       this.renderTeammateFilterList();
       this.render();
     });
@@ -636,9 +658,8 @@ export class PendingUpdatesSidebar extends Widget {
       teammateRow.className = 'connected-teammate-row';
 
       // Display truncated hash for privacy
-      const displayId = teammate.length > 12
-        ? `${teammate.substring(0, 12)}...`
-        : teammate;
+      const displayId =
+        teammate.length > 12 ? `${teammate.substring(0, 12)}...` : teammate;
 
       // Online indicator dot
       const statusDot = document.createElement('span');
@@ -679,7 +700,9 @@ export class PendingUpdatesSidebar extends Widget {
 
   // Render the teammate filter list (checkboxes for selected mode)
   private renderTeammateFilterList() {
-    const container = this.node.querySelector('.teammate-filter-list') as HTMLElement;
+    const container = this.node.querySelector(
+      '.teammate-filter-list'
+    ) as HTMLElement;
     if (!container) {
       return;
     }
@@ -719,9 +742,10 @@ export class PendingUpdatesSidebar extends Widget {
 
       const label = document.createElement('label');
       label.htmlFor = `filter-teammate-${teammate.id}`;
-      const displayId = teammate.id.length > 12
-        ? `${teammate.id.substring(0, 12)}...`
-        : teammate.id;
+      const displayId =
+        teammate.id.length > 12
+          ? `${teammate.id.substring(0, 12)}...`
+          : teammate.id;
       label.textContent = displayId;
       label.title = teammate.id;
 
@@ -747,8 +771,10 @@ export class PendingUpdatesSidebar extends Widget {
         updates = updates.filter(u => u.senderType === 'teammate');
         break;
       case 'selected':
-        updates = updates.filter(u =>
-          u.senderType === 'teammate' && this._selectedTeammateFilters.has(u.sender)
+        updates = updates.filter(
+          u =>
+            u.senderType === 'teammate' &&
+            this._selectedTeammateFilters.has(u.sender)
         );
         break;
       case 'all':
@@ -760,23 +786,40 @@ export class PendingUpdatesSidebar extends Widget {
     return updates;
   }
 
-
   // Disconnects the Previous panel signal's and sets the current panel as the new panel.
   setCurrentPanel(panel: NotebookPanel | null) {
     // disconnect metadata listener from previous panel (if any)
     if (this._currentPanel && !this._currentPanel.isDisposed) {
       try {
         const prevModelAny: any = this._currentPanel.context.model;
-        if (prevModelAny && prevModelAny.metadata && prevModelAny.metadata.changed && this._metadataConnected) {
-          prevModelAny.metadata.changed.disconnect(this._boundMetadataChanged, this);
+        if (
+          prevModelAny &&
+          prevModelAny.metadata &&
+          prevModelAny.metadata.changed &&
+          this._metadataConnected
+        ) {
+          prevModelAny.metadata.changed.disconnect(
+            this._boundMetadataChanged,
+            this
+          );
           this._metadataConnected = false;
         }
 
         // disconnect cells.changed if connected
         try {
-          const prevContentModelAny: any = this._currentPanel.content && (this._currentPanel.content as any).model;
-          if (prevContentModelAny && prevContentModelAny.cells && prevContentModelAny.cells.changed && this._cellsConnected) {
-            prevContentModelAny.cells.changed.disconnect(this._boundCellsChanged, this);
+          const prevContentModelAny: any =
+            this._currentPanel.content &&
+            (this._currentPanel.content as any).model;
+          if (
+            prevContentModelAny &&
+            prevContentModelAny.cells &&
+            prevContentModelAny.cells.changed &&
+            this._cellsConnected
+          ) {
+            prevContentModelAny.cells.changed.disconnect(
+              this._boundCellsChanged,
+              this
+            );
             this._cellsConnected = false;
           }
         } catch (e) {
@@ -806,20 +849,27 @@ export class PendingUpdatesSidebar extends Widget {
         // connect to metadata.changed where available
         if (modelAny && modelAny.metadata && modelAny.metadata.changed) {
           modelAny.metadata.changed.connect(this._boundMetadataChanged, this);
-          console.log("Metadata.changed is available")
           this._metadataConnected = true;
         } else if (modelAny && modelAny.changed) {
           // fallback to model-level change signal
-          console.log("Falling back to model level change")
+          console.log('Falling back to model level change');
           modelAny.changed.connect(this._boundMetadataChanged, this);
           this._metadataConnected = true;
         }
 
         // connect to cells.changed on the notebook content model to detect deletions
         try {
-          const contentModelAny: any = panel.content && (panel.content as any).model;
-          if (contentModelAny && contentModelAny.cells && contentModelAny.cells.changed) {
-            contentModelAny.cells.changed.connect(this._boundCellsChanged, this);
+          const contentModelAny: any =
+            panel.content && (panel.content as any).model;
+          if (
+            contentModelAny &&
+            contentModelAny.cells &&
+            contentModelAny.cells.changed
+          ) {
+            contentModelAny.cells.changed.connect(
+              this._boundCellsChanged,
+              this
+            );
             this._cellsConnected = true;
           }
         } catch (e) {
@@ -841,7 +891,6 @@ export class PendingUpdatesSidebar extends Widget {
     }
     container.innerHTML = '';
 
-
     if (!this._currentPanel || this._currentPanel.isDisposed) {
       container.textContent = 'No notebook selected';
       return;
@@ -853,13 +902,19 @@ export class PendingUpdatesSidebar extends Widget {
     // get and sort updates according to the current sort key, then filter
     let updates = this.getFilteredUpdates();
     if (updates && updates.length > 0) {
-      if (this._sortKey == 'time') {
+      if (this._sortKey === 'time') {
         updates = updates.slice().sort((a, b) => {
-          return new Date(b.timeReceived).getTime() - new Date(a.timeReceived).getTime();
-        })
-      } else if (this._sortKey == 'cell') {
-        const origMapping = getOrigCellMapping(this._currentPanel as NotebookPanel);
-        updates = updates.slice().sort((a, b) => { // Make it more easy to read and understand
+          return (
+            new Date(b.timeReceived).getTime() -
+            new Date(a.timeReceived).getTime()
+          );
+        });
+      } else if (this._sortKey === 'cell') {
+        const origMapping = getOrigCellMapping(
+          this._currentPanel as NotebookPanel
+        );
+        updates = updates.slice().sort((a, b) => {
+          // Make it more easy to read and understand
           const aPos = origMapping ? origMapping.lastIndexOf(a.id) : -1;
           const bPos = origMapping ? origMapping.lastIndexOf(b.id) : -1;
           const ai = aPos === -1 ? Number.POSITIVE_INFINITY : aPos;
@@ -869,27 +924,33 @@ export class PendingUpdatesSidebar extends Widget {
       }
     }
 
-
     if (!updates || updates.length === 0) {
-      container.textContent = this._filterMode === 'all'
-        ? 'No pending updates'
-        : 'No updates matching the current filter';
+      container.textContent =
+        this._filterMode === 'all'
+          ? 'No pending updates'
+          : 'No updates matching the current filter';
       return;
     }
 
     // helper to extract code text from a stored message
     const extractCodeText = (message: any): string => {
       try {
-        const parsed = typeof message === 'string' ? JSON.parse(message) : message;
+        const parsed =
+          typeof message === 'string' ? JSON.parse(message) : message;
         // support payloads like { cells: [...] } or direct cell objects
         if (parsed && Array.isArray(parsed.cells) && parsed.cells.length > 0) {
-          return parsed.cells[0].source ?? parsed.cells[0].cell_content ?? JSON.stringify(parsed.cells[0], null, 2);
+          return (
+            parsed.cells[0].source ??
+            parsed.cells[0].cell_content ??
+            JSON.stringify(parsed.cells[0], null, 2)
+          );
         }
         // final fallback: pretty JSON
-        return typeof message === 'string' ? message : JSON.stringify(message, null, 2);
-
+        return typeof message === 'string'
+          ? message
+          : JSON.stringify(message, null, 2);
       } catch (e) {
-        console.log("Cannot read the message")
+        console.log('Cannot read the message');
         return typeof message === 'string' ? message : String(message);
       }
     };
@@ -907,14 +968,16 @@ export class PendingUpdatesSidebar extends Widget {
       label.className = 'pending-update-label';
 
       // Uses the original-id ordering returned by getOrigCellMapping
-      const origMapping = getOrigCellMapping(this._currentPanel as NotebookPanel);
+      const origMapping = getOrigCellMapping(
+        this._currentPanel as NotebookPanel
+      );
       let cellLabel = String(u.id ?? '');
       if (origMapping && u.id) {
         const pos = origMapping.indexOf(u.id);
         if (pos !== -1) {
           cellLabel = `Cell ${pos + 1}`;
         } else {
-          cellLabel = `Cell: unknown`;
+          cellLabel = 'Cell: unknown';
         }
       } else if (!u.id) {
         cellLabel = 'Cell: unknown';
@@ -928,9 +991,8 @@ export class PendingUpdatesSidebar extends Widget {
       if (u.senderType === 'teacher') {
         senderDisplay = 'Teacher';
       } else if (u.sender) {
-        senderDisplay = u.sender.length > 8
-          ? `${u.sender.substring(0, 8)}...`
-          : u.sender;
+        senderDisplay =
+          u.sender.length > 8 ? `${u.sender.substring(0, 8)}...` : u.sender;
       } else {
         senderDisplay = 'Unknown';
       }
@@ -962,7 +1024,14 @@ export class PendingUpdatesSidebar extends Widget {
       removeBtn.onclick = () => {
         if (this._currentPanel) {
           // Pass true to log the interaction, and pass the sender, senderType, and updateId
-          removePendingUpdate(this._currentPanel, u.id, true, u.sender, u.senderType, u.updateId);
+          removePendingUpdate(
+            this._currentPanel,
+            u.id,
+            true,
+            u.sender,
+            u.senderType,
+            u.updateId
+          );
           this.render();
         }
       };
@@ -1039,8 +1108,7 @@ function showUpdateNotification(
 ) {
   // Future: add a diff view of the changes
   let notificationTitle = 'Notebook Updated';
-  const notificationNote =
-    '(Note: your code will be moved to one cell above.)';
+  const notificationNote = '(Note: your code will be moved to one cell above.)';
 
   // Display "teacher" or "teammate" based on the sender type
   const displaySender = senderType === 'teacher' ? 'teacher' : 'teammate';
@@ -1050,28 +1118,31 @@ function showUpdateNotification(
 
   if (!cellId) {
     try {
-      const parsed = typeof newContent === 'string' ? JSON.parse(newContent) : newContent;
+      const parsed =
+        typeof newContent === 'string' ? JSON.parse(newContent) : newContent;
 
       // Try different ways to get cell_id
       if (parsed.content) {
         cellId = parsed.content.id || parsed.content.cell_id;
-        if (!cellId && parsed.content.cells && parsed.content.cells.length > 0) {
-          cellId = parsed.content.cells[0].id || parsed.content.cells[0].cell_id;
+        if (
+          !cellId &&
+          parsed.content.cells &&
+          parsed.content.cells.length > 0
+        ) {
+          cellId =
+            parsed.content.cells[0].id || parsed.content.cells[0].cell_id;
         }
       } else if (parsed.cells && parsed.cells.length > 0) {
         cellId = parsed.cells[0].id || parsed.cells[0].cell_id;
       }
-
-      console.log(`${APP_ID}: Extracted cellId in notification: ${cellId}`);
     } catch (e) {
       console.warn('Failed to extract cellId from newContent', e);
     }
   }
 
   // Determine the final update ID to use
-  const finalUpdateId = updateId || cellId || Math.random().toString(36).substring(2, 15);
-
-  console.log(`${APP_ID}: Notification - cellId: ${cellId}, finalUpdateId: ${finalUpdateId}`);
+  const finalUpdateId =
+    updateId || cellId || Math.random().toString(36).substring(2, 15);
 
   let notificationBody = `Your ${displaySender} updated this notebook. Would you like to get the latest version? You can also update it later from the Pending Updates sidebar.`;
   if (action === UPDATE_CELL_ACTION) {
@@ -1102,12 +1173,24 @@ function showUpdateNotification(
   const laterButton = document.getElementById(`later-${id}-button`);
   if (updateButton) {
     updateButton.addEventListener('click', async () => {
-      console.log(`${APP_ID}: UPDATE_NOW clicked - cellId: ${cellId}, finalUpdateId: ${finalUpdateId}`);
-
       // Log the interaction
-      logPendingUpdateInteraction(notebookPanel, 'UPDATE_NOW', cellId, sender, senderType, finalUpdateId);
+      logPendingUpdateInteraction(
+        notebookPanel,
+        'UPDATE_NOW',
+        cellId,
+        sender,
+        senderType,
+        finalUpdateId
+      );
 
-      await updateNotebookContent(notebookPanel, newContent, finalUpdateId, cellId, sender, senderType);
+      await updateNotebookContent(
+        notebookPanel,
+        newContent,
+        finalUpdateId,
+        cellId,
+        sender,
+        senderType
+      );
 
       // Remove any pending updates that correspond to the applied content
       try {
@@ -1139,7 +1222,10 @@ function showUpdateNotification(
           renderPendingUpdatesWidget(notebookPanel);
         }
       } catch (err) {
-        console.warn('Could not parse applied content to cleanup pending updates', err);
+        console.warn(
+          'Could not parse applied content to cleanup pending updates',
+          err
+        );
       }
 
       if (notificationDiv) {
@@ -1149,8 +1235,6 @@ function showUpdateNotification(
   }
   if (laterButton) {
     laterButton.addEventListener('click', () => {
-      console.log(`${APP_ID}: UPDATE_LATER clicked - cellId: ${cellId}, finalUpdateId: ${finalUpdateId}`);
-
       // Add the update to the pending updates list
       const updates = getPendingUpdates(notebookPanel);
 
@@ -1164,8 +1248,6 @@ function showUpdateNotification(
         cellId: cellId // Store the actual cell_id from the update content
       };
 
-      console.log(`${APP_ID}: Created pending update:`, newUpdate);
-
       // Filter out existing update with same ID if present, then add new one
       const filteredUpdates = updates.filter(u => u.id !== newUpdate.id);
       filteredUpdates.push(newUpdate);
@@ -1174,7 +1256,14 @@ function showUpdateNotification(
       renderPendingUpdatesWidget(notebookPanel);
 
       // Log the interaction
-      logPendingUpdateInteraction(notebookPanel, 'UPDATE_LATER', cellId, sender, senderType, finalUpdateId);
+      logPendingUpdateInteraction(
+        notebookPanel,
+        'UPDATE_LATER',
+        cellId,
+        sender,
+        senderType,
+        finalUpdateId
+      );
 
       if (notificationDiv) {
         notificationDiv.remove();
@@ -1238,10 +1327,11 @@ async function updateNotebookContent(
 
         // Copy the existing content to the new cell above
         const newCellAbove = notebook.widgets[cellIndex];
-        const yourCodePrefix = cellType === 'markdown'
-          ? '# YOUR CODE\n\n'
-          : '# YOUR CODE\n\n';
-        newCellAbove.model.sharedModel.setSource(yourCodePrefix + existingSource);
+        const yourCodePrefix =
+          cellType === 'markdown' ? '# YOUR CODE\n\n' : '# YOUR CODE\n\n';
+        newCellAbove.model.sharedModel.setSource(
+          yourCodePrefix + existingSource
+        );
 
         // Explicitly set the orig_cell_id for the new "Your Code" cell to match the original cell's ID (cellUpdate.id), not the cell above it. This ensures both cells share the same orig_cell_id for proper mapping.
         setOrigCellId(newCellAbove.model, cellUpdate.id);
@@ -1276,9 +1366,10 @@ async function updateNotebookContent(
       );
 
       if (notebookId) {
-        const cellUpdatesArray = typeof newContent === 'string'
-          ? JSON.parse(newContent).cells
-          : newContent.cells;
+        const cellUpdatesArray =
+          typeof newContent === 'string'
+            ? JSON.parse(newContent).cells
+            : newContent.cells;
 
         for (const cellUpdate of cellUpdatesArray) {
           const cellUpdateId = cellUpdate.id || cellUpdate.cell_id;

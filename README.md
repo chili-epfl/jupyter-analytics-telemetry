@@ -10,6 +10,13 @@ This repository is part of the learning analytics system ([**Jupyter Analytics**
 
 - JupyterLab >= 3.1.0
 
+### Compatibility
+
+| Project Version | Tested With            | Notes                        |
+| --------------- | ---------------------- | ---------------------------- |
+| >= v5.0.0       | JupyterLab 4.x only    | JupyterLab 3.x not supported |
+| < v5.0.0        | JupyterLab 4.x and 3.x | Deprecated compatibility     |
+
 ## Install
 
 To install the extension, execute:
@@ -150,7 +157,7 @@ This project is part of the "[Uni Analytics](https://data.snf.ch/grants/grant/18
 
 If you find this repository useful, please cite our paper:
 
-```
+```text
 Cai, Z., Davis, R., Mariétan, R., Tormey, R., & Dillenbourg, P. (2025).
 Jupyter Analytics: A Toolkit for Collecting, Analyzing, and Visualizing Distributed Student Activity in Jupyter Notebooks.
 In Proceedings of the 56th ACM Technical Symposium on Computer Science Education (SIGCSE TS 2025).

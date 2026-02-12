@@ -51,7 +51,9 @@ export class PanelManager {
   }
 
   // Set callback for cell change (to send location updates)
-  set onCellChange(callback: ((cellId: string, cellIndex: number) => void) | null) {
+  set onCellChange(
+    callback: ((cellId: string, cellIndex: number) => void) | null
+  ) {
     this._onCellChangeCallback = callback;
   }
 
@@ -143,10 +145,11 @@ export class PanelManager {
               }
             );
 
-
             // Register callback for teammate changes (if set)
             if (this._onTeammateChangeCallback) {
-              this._websocketManager.onTeammateChange(this._onTeammateChangeCallback);
+              this._websocketManager.onTeammateChange(
+                this._onTeammateChangeCallback
+              );
             }
 
             // Check if the user has permission to push notebook changes
@@ -156,7 +159,6 @@ export class PanelManager {
             if (this._panel && this._onCellChangeCallback) {
               const notebook = this._panel.content;
               const panel = this._panel;
-              console.log(`${APP_ID}: Setting up cell change listener for location tracking`);
               this._cellChangeHandler = () => {
                 const activeCell = notebook.activeCell;
                 if (activeCell && this._onCellChangeCallback) {
@@ -171,11 +173,12 @@ export class PanelManager {
                 }
               };
               notebook.activeCellChanged.connect(this._cellChangeHandler);
-              console.log(`${APP_ID}: Cell change handler connected`);
               // Send initial location
               this._cellChangeHandler();
             } else {
-              console.log(`${APP_ID}: Cannot set up cell change listener - panel: ${!!this._panel}, callback: ${!!this._onCellChangeCallback}`);
+              console.log(
+                `${APP_ID}: Cannot set up cell change listener - panel: ${!!this._panel}, callback: ${!!this._onCellChangeCallback}`
+              );
             }
           }
         });
@@ -265,7 +268,9 @@ export class PanelManager {
   private _settings: ISettingRegistry.ISettings;
   private _dialogShownSettings: ISettingRegistry.ISettings;
   private _onTeammateChangeCallback: (() => void) | null = null;
-  private _onCellChangeCallback: ((cellId: string, cellIndex: number) => void) | null = null;
+  private _onCellChangeCallback:
+    | ((cellId: string, cellIndex: number) => void)
+    | null = null;
   private _cellChangeHandler: (() => void) | null = null;
 
   private _cellMappingDisposable: CellMappingDisposable | null = null;

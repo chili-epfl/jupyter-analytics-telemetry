@@ -14,7 +14,6 @@ import {
 const postRequest = (data: PostDataObject, endpoint: string): void => {
   if (!PERSISTENT_USER_ID) {
     console.log(`${APP_ID}: No user id`);
-    return;
   } else {
     // add the user_id to the payload
     const dataWithUser = {
@@ -29,19 +28,15 @@ const postRequest = (data: PostDataObject, endpoint: string): void => {
       console.log(
         `${APP_ID}: Payload size exceeds limit of ${MAX_PAYLOAD_SIZE / 1024 / 1024} Mb`
       );
-      return;
     } else {
-      console.log(`${APP_ID}: Posting to ` + endpoint + ' :\n', dataWithUser);
       fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: payload
-      }).then(response => {
-        response
-          .json()
-          .then(responseData => console.log(`${APP_ID}: ` + responseData));
+      }).catch(error => {
+        console.log(`${APP_ID}: Post request failed`, error);
       });
     }
   }
