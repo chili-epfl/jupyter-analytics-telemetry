@@ -6,8 +6,7 @@ import { AlterationDisposable } from './trackers/AlterationDisposable';
 import { CellMappingDisposable } from './trackers/CellMappingDisposable';
 import { ExecutionDisposable } from './trackers/ExecutionDisposable';
 import { FocusDisposable } from './trackers/FocusDisposable';
-// ...existing code...
-import { APP_ID, EXTENSION_SETTING_NAME, Selectors } from './utils/constants';
+import { APP_ID, EXTENSION_SETTING_NAME } from './utils/constants';
 import {
   checkGroupSharePermission,
   handleSyncMessage

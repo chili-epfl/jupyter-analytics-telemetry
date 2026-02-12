@@ -3,7 +3,7 @@ import { NotebookPanel } from '@jupyterlab/notebook';
 import { shareIcon } from '@jupyterlab/ui-components';
 import { PanelManager } from './PanelManager';
 import { CompatibilityManager } from './utils/compatibility';
-import { APP_ID, CommandIDs, Selectors } from './utils/constants';
+import { CommandIDs, Selectors } from './utils/constants';
 import {
   bindRenderPendingUpdatesWidget,
   bindRequestCurrentPanel,

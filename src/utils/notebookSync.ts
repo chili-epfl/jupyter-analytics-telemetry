@@ -7,7 +7,7 @@ import { postPendingUpdateInteraction } from '../api';
 import { WEBSOCKET_API_URL } from '../dataCollectionPlugin';
 import { CompatibilityManager } from './compatibility';
 import { APP_ID, Selectors } from './constants';
-import { getOrigCellMapping, setOrigCellId } from './utils';
+import { getOrigCellMapping } from './utils';
 
 // Sync action type constants
 const UPDATE_CELL_ACTION = 'update_cell';
