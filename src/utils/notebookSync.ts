@@ -1327,14 +1327,10 @@ async function updateNotebookContent(
 
         // Copy the existing content to the new cell above
         const newCellAbove = notebook.widgets[cellIndex];
-        const yourCodePrefix =
-          cellType === 'markdown' ? '# YOUR CODE\n\n' : '# YOUR CODE\n\n';
-        newCellAbove.model.sharedModel.setSource(
-          yourCodePrefix + existingSource
-        );
-
-        // Explicitly set the orig_cell_id for the new "Your Code" cell to match the original cell's ID (cellUpdate.id), not the cell above it. This ensures both cells share the same orig_cell_id for proper mapping.
-        setOrigCellId(newCellAbove.model, cellUpdate.id);
+        const yourCodePrefix = cellType === 'markdown'
+          ? '# YOUR CODE\n\n'
+          : '# YOUR CODE\n\n';
+        newCellAbove.model.sharedModel.setSource(yourCodePrefix + existingSource);
 
         // Update the original cell (which is now at cellIndex + 1)
         const originalCell = notebook.widgets[cellIndex + 1];
