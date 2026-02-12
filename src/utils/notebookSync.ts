@@ -7,7 +7,7 @@ import { postPendingUpdateInteraction } from '../api';
 import { WEBSOCKET_API_URL } from '../dataCollectionPlugin';
 import { CompatibilityManager } from './compatibility';
 import { APP_ID, Selectors } from './constants';
-import { getOrigCellMapping, setOrigCellId} from './utils';
+import { getOrigCellMapping, setOrigCellId } from './utils';
 
 // Sync action type constants
 const UPDATE_CELL_ACTION = 'update_cell';
@@ -62,8 +62,6 @@ const logPendingUpdateInteraction = (
     time: new Date().toISOString()
   });
 };
-
-
 
 // Function to handle the 'chat' message and trigger updates: Step 1
 export const handleSyncMessage = (
@@ -1327,10 +1325,11 @@ async function updateNotebookContent(
 
         // Copy the existing content to the new cell above
         const newCellAbove = notebook.widgets[cellIndex];
-        const yourCodePrefix = cellType === 'markdown'
-          ? '# YOUR CODE\n\n'
-          : '# YOUR CODE\n\n';
-        newCellAbove.model.sharedModel.setSource(yourCodePrefix + existingSource);
+        const yourCodePrefix =
+          cellType === 'markdown' ? '# YOUR CODE\n\n' : '# YOUR CODE\n\n';
+        newCellAbove.model.sharedModel.setSource(
+          yourCodePrefix + existingSource
+        );
 
         // Update the original cell (which is now at cellIndex + 1)
         const originalCell = notebook.widgets[cellIndex + 1];

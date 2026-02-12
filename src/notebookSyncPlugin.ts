@@ -5,12 +5,12 @@ import { PanelManager } from './PanelManager';
 import { CompatibilityManager } from './utils/compatibility';
 import { APP_ID, CommandIDs, Selectors } from './utils/constants';
 import {
-    bindRenderPendingUpdatesWidget,
-    bindRequestCurrentPanel,
-    createPendingUpdatesSidebar,
-    getConnectedTeammates,
-    groupShareFlags,
-    PendingUpdatesSidebar
+  bindRenderPendingUpdatesWidget,
+  bindRequestCurrentPanel,
+  createPendingUpdatesSidebar,
+  getConnectedTeammates,
+  groupShareFlags,
+  PendingUpdatesSidebar
 } from './utils/notebookSync';
 import { getOrigCellMapping } from './utils/utils';
 

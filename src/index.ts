@@ -80,7 +80,6 @@ const activate = (
     });
   }
 
-
   const targetVersion = '3.1.0';
   const appNumbers = app.version.match(/[0-9]+/g);
 

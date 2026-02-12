@@ -12,7 +12,7 @@ import {
   checkGroupSharePermission,
   handleSyncMessage
 } from './utils/notebookSync';
-import { isNotebookValid, getOrigCellMapping } from './utils/utils';
+import { getOrigCellMapping, isNotebookValid } from './utils/utils';
 import { WebsocketManager } from './websocket/WebsocketManager';
 
 export class PanelManager {
@@ -166,9 +166,13 @@ export class PanelManager {
 
                   // Get orig_cell_id using the utility function
                   const origMapping = getOrigCellMapping(panel);
-                  const origCellId = origMapping[cellIndex] || activeCell.model.id;
+                  const origCellId =
+                    origMapping[cellIndex] || activeCell.model.id;
 
-                  console.log(`${APP_ID}: Cell changed, calling onCellChange callback:`, { origCellId, cellIndex });
+                  console.log(
+                    `${APP_ID}: Cell changed, calling onCellChange callback:`,
+                    { origCellId, cellIndex }
+                  );
                   this._onCellChangeCallback(origCellId, cellIndex);
                 }
               };

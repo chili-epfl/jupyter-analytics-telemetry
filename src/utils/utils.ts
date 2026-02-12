@@ -130,7 +130,9 @@ export const getOrigCellMapping = (panel: NotebookPanel): string[] => {
     } else if (cellMapping) {
       // 2. Fall back to notebook-level mapping
       const cellId = cell.model.id;
-      const mappingEntry = cellMapping.find((row: string[]) => row[0] === cellId);
+      const mappingEntry = cellMapping.find(
+        (row: string[]) => row[0] === cellId
+      );
       result.push(mappingEntry ? mappingEntry[1] : cellId);
     } else {
       // 3. No mapping at all, use cell's own ID

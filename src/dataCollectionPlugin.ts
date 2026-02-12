@@ -2,8 +2,14 @@ import { JupyterFrontEnd, LabShell } from '@jupyterlab/application';
 import { NotebookPanel } from '@jupyterlab/notebook';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { PanelManager } from './PanelManager';
-import { notebookSyncPlugin, refreshPendingSidebar } from './notebookSyncPlugin';
-import { refreshLocationSidebar, teammateLocationPlugin } from './teammateLocationPlugin';
+import {
+  notebookSyncPlugin,
+  refreshPendingSidebar
+} from './notebookSyncPlugin';
+import {
+  refreshLocationSidebar,
+  teammateLocationPlugin
+} from './teammateLocationPlugin';
 import { APP_ID } from './utils/constants';
 
 let isPluginActivated = false;
@@ -72,7 +78,6 @@ export const dataCollectionPlugin = async (
     // Initialize other plugins (sync and location tracking)
     notebookSyncPlugin(app, panelManager);
     teammateLocationPlugin(app, panelManager);
-
   } catch (error) {
     console.log(`${APP_ID}: Could not load settings, error: ${error}`);
   }
