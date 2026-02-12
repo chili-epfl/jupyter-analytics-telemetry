@@ -2,14 +2,14 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { APP_ID } from './utils/constants';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { LabIcon } from '@jupyterlab/ui-components';
 import { ISignal, Signal } from '@lumino/signaling';
-import { CompatibilityManager } from './utils/compatibility';
-import { compareVersions } from './utils/utils';
 import { dataCollectionPlugin } from './dataCollectionPlugin';
 import { requestAPI } from './handler';
+import { CompatibilityManager } from './utils/compatibility';
+import { APP_ID } from './utils/constants';
+import { compareVersions } from './utils/utils';
 
 // to register the svg icon to reuse it in the settings (through schema/settings.json > jupyter.lab.setting-icon)
 import schemaStr from '../style/icons/dataCollection_cropped.svg';
@@ -52,17 +52,6 @@ const activate = (
 ): void => {
   console.log(`JupyterLab extension ${APP_ID} is activated!`);
 
-  // Check if dashboard extension is installed
-  isDashboardExtensionInstalled = app
-    .listPlugins()
-    .some(item => item.includes('jupyterlab_unianalytics_dashboard'));
-
-  // If dashboard is installed, don't activate telemetry
-  if (isDashboardExtensionInstalled) {
-    console.log(`${APP_ID}: Dashboard extension detected, telemetry disabled`);
-    return; // Exit early
-  }
-
   requestAPI<string>('get_user_id')
     .then(data => {
       PERSISTENT_USER_ID = data;
@@ -72,6 +61,24 @@ const activate = (
         `${APP_ID}: server extension appears to be missing.\n${reason}`
       );
     });
+
+  isDashboardExtensionInstalled = app
+    .listPlugins()
+    .some(item => item.includes('jupyterlab_unianalytics_dashboard'));
+
+  if (isDashboardExtensionInstalled) {
+    // do something
+    window.addEventListener('message', (event: any) => {
+      // check that the message was emitted from the same origin
+      if (
+        event.origin === window.origin &&
+        event.data &&
+        event.data.identifier === 'unianalytics'
+      ) {
+        disabledNotebooksSignaler.value = event.data.authNotebooks;
+      }
+    });
+  }
 
   const targetVersion = '3.1.0';
   const appNumbers = app.version.match(/[0-9]+/g);

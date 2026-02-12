@@ -6,13 +6,12 @@ import { AlterationDisposable } from './trackers/AlterationDisposable';
 import { CellMappingDisposable } from './trackers/CellMappingDisposable';
 import { ExecutionDisposable } from './trackers/ExecutionDisposable';
 import { FocusDisposable } from './trackers/FocusDisposable';
-import { CompatibilityManager } from './utils/compatibility';
-import { APP_ID, EXTENSION_SETTING_NAME, Selectors } from './utils/constants';
+import { APP_ID, EXTENSION_SETTING_NAME } from './utils/constants';
 import {
   checkGroupSharePermission,
   handleSyncMessage
 } from './utils/notebookSync';
-import { isNotebookValid } from './utils/utils';
+import { getOrigCellMapping, isNotebookValid } from './utils/utils';
 import { WebsocketManager } from './websocket/WebsocketManager';
 
 export class PanelManager {
@@ -162,18 +161,17 @@ export class PanelManager {
               this._cellChangeHandler = () => {
                 const activeCell = notebook.activeCell;
                 if (activeCell && this._onCellChangeCallback) {
-                  const cellId = activeCell.model.id;
                   const cellIndex = notebook.activeCellIndex;
 
-                  // Get orig_cell_id from cell mapping
-                  const cellMapping: [string, string][] | null | undefined =
-                    CompatibilityManager.getMetadataComp(
-                      panel.context.model,
-                      Selectors.cellMapping
-                    );
-                  const mapping = cellMapping?.find(([key]) => key === cellId);
-                  const origCellId = mapping ? mapping[1] : cellId;
+                  // Get orig_cell_id using the utility function
+                  const origMapping = getOrigCellMapping(panel);
+                  const origCellId =
+                    origMapping[cellIndex] || activeCell.model.id;
 
+                  console.log(
+                    `${APP_ID}: Cell changed, calling onCellChange callback:`,
+                    { origCellId, cellIndex }
+                  );
                   this._onCellChangeCallback(origCellId, cellIndex);
                 }
               };

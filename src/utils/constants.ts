@@ -14,6 +14,8 @@ export namespace Selectors {
   export const pendingUpdates = `${SELECTOR_ID}_pending_updates`;
 
   export const updatedCells = `${SELECTOR_ID}_updated_cells`;
+
+  export const origCellId = `${SELECTOR_ID}_orig_cell_id`;
 }
 
 export namespace CommandIDs {

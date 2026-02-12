@@ -1277,7 +1277,7 @@ async function updateNotebookContent(
   cellId?: string,
   sender?: string,
   senderType?: 'teacher' | 'teammate',
-  skipLogging: boolean = false // Add parameter to skip logging
+  skipLogging: boolean = false
 ) {
   try {
     const cellUpdates =
