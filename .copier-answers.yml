@@ -11,10 +11,10 @@ kind: server
 labextension_name: jupyterlab_unianalytics_telemetry
 mimetype: ''
 mimetype_name: ''
-project_short_description: A JupyterLab extension to send notebook interaction data
-    to a backend.
+project_short_description:
+  A JupyterLab extension to send notebook interaction data
+  to a backend.
 python_name: jupyterlab_unianalytics_telemetry
 repository: https://github.com/chili-epfl/jupyter-analytics-telemetry
 test: true
 viewer_name: ''
-

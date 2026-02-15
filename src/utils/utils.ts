@@ -1,3 +1,4 @@
+import { ICellModel } from '@jupyterlab/cells';
 import { IOutput, MultilineString, IMimeBundle } from '@jupyterlab/nbformat';
 import { PartialJSONObject } from '@lumino/coreutils';
 import { NotebookPanel } from '@jupyterlab/notebook';
@@ -106,14 +107,54 @@ export const getOrigCellMapping = (panel: NotebookPanel): string[] => {
     return [];
   }
 
+  // Get notebook-level cell mapping
   const cellMapping = CompatibilityManager.getMetadataComp(
     panel.context.model,
     Selectors.cellMapping
   );
 
-  if (!cellMapping) {
-    return [];
+  const notebook = panel.content;
+  const result: string[] = [];
+
+  for (let i = 0; i < notebook.widgets.length; i++) {
+    const cell = notebook.widgets[i];
+
+    // 1. First, check cell-level metadata (set by setOrigCellId)
+    const cellOrigId = CompatibilityManager.getMetadataComp(
+      cell.model,
+      Selectors.origCellId
+    );
+
+    if (cellOrigId) {
+      result.push(cellOrigId);
+    } else if (cellMapping) {
+      // 2. Fall back to notebook-level mapping
+      const cellId = cell.model.id;
+      const mappingEntry = cellMapping.find(
+        (row: string[]) => row[0] === cellId
+      );
+      result.push(mappingEntry ? mappingEntry[1] : cellId);
+    } else {
+      // 3. No mapping at all, use cell's own ID
+      result.push(cell.model.id);
+    }
   }
 
-  return cellMapping.map((row: string[]) => row[1]);
+  return result;
+};
+
+/**
+ * Sets the orig_cell_id for a cell explicitly.
+ * Useful when inserting cells that should share an orig_cell_id with another cell
+ * (e.g., when using insertAbove for "Your Code" cells).
+ */
+export const setOrigCellId = (
+  cellModel: ICellModel,
+  origCellId: string
+): void => {
+  CompatibilityManager.setMetadataComp(
+    cellModel,
+    Selectors.origCellId,
+    origCellId
+  );
 };
