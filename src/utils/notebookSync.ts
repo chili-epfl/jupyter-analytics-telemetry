@@ -379,10 +379,10 @@ export class PendingUpdatesSidebar extends Widget {
 
   constructor() {
     super();
-    this.id = 'unianalytics-pending-updates-sidebar';
+    this.id = 'jupyterlab-unianalytics-pending-updates-sidebar';
     this.title.label = 'Pending updates';
     this.title.closable = true;
-    this.addClass('unianalytics-pending-updates-sidebar');
+    this.addClass('pending-updates-sidebar');
 
     // header with refresh button
     const header = document.createElement('div');

@@ -120,7 +120,7 @@
 }
 
 /* Generic small button */
-.btn {
+.pending-updates-sidebar .btn {
   padding: 6px 10px;
   border-radius: 6px;
   border: 1px solid transparent;
@@ -132,17 +132,17 @@
     box-shadow 100ms ease;
 }
 
-.btn:hover {
+.pending-updates-sidebar .btn:hover {
   transform: translateY(-1px);
 }
 
-.btn-apply {
+.pending-updates-sidebar .btn-apply {
   background: #4caf50;
   color: white;
   border-color: rgb(0 0 0 / 5%);
 }
 
-.btn-delete {
+.pending-updates-sidebar .btn-delete {
   background: #f44336;
   color: white;
   border-color: rgb(0 0 0 / 5%);
@@ -182,34 +182,40 @@
   align-items: center;
 }
 
-.pending-updates-header .btn {
-  font-size: 12px;
+.pending-updates-sidebar .pending-updates-header .btn {
+  font-size: 0.85rem;
   padding: 6px 10px;
   border-radius: 6px;
   min-width: 72px;
+  min-height: 36px;
   line-height: 1;
 }
 
 /* specific button variants */
-.btn-apply-all {
+.pending-updates-sidebar .btn-apply-all {
   background: #4caf50;
   color: #fff;
   border: 1px solid rgb(0 0 0 / 6%);
 }
 
-.btn-delete-all {
+.pending-updates-sidebar .btn-delete-all {
   background: #f44336;
   color: #fff;
   border: 1px solid rgb(0 0 0 / 6%);
 }
 
+/* Make per-row action buttons visually consistent with header buttons */
+.pending-updates-sidebar .pending-update-actions .btn {
+  min-width: 72px;
+}
+
 /* subtle hover / focus states */
-.pending-updates-header .btn:hover {
+.pending-updates-sidebar .pending-updates-header .btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 2px 6px rgb(0 0 0 / 8%);
 }
 
-.pending-updates-header .btn:focus {
+.pending-updates-sidebar .pending-updates-header .btn:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgb(25 118 210 / 12%);
 }
@@ -237,16 +243,16 @@
     flex-wrap: wrap;
   }
 
-  .btn.btn-sort-time,
-  .btn.btn-sort-cell {
+  .pending-updates-sidebar .btn.btn-sort-time,
+  .pending-updates-sidebar .btn.btn-sort-cell {
     min-width: 48%;
     flex: 1 1 48%;
   }
 }
 
 /* Reuse .btn small sizing but add toggle visuals */
-.btn.btn-sort-time,
-.btn.btn-sort-cell {
+.pending-updates-sidebar .btn.btn-sort-time,
+.pending-updates-sidebar .btn.btn-sort-cell {
   min-width: 56px;
   padding: 6px 8px;
   border-radius: 6px;
@@ -266,22 +272,22 @@
 }
 
 /* Hover / focus affordances */
-.btn.btn-sort-time:hover,
-.btn.btn-sort-cell:hover {
+.pending-updates-sidebar .btn.btn-sort-time:hover,
+.pending-updates-sidebar .btn.btn-sort-cell:hover {
   background-color: rgb(25 118 210 / 6%);
   transform: translateY(-1px);
   border-color: rgb(25 118 210 / 14%);
 }
 
-.btn.btn-sort-time:focus,
-.btn.btn-sort-cell:focus {
+.pending-updates-sidebar .btn.btn-sort-time:focus,
+.pending-updates-sidebar .btn.btn-sort-cell:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgb(25 118 210 / 10%);
 }
 
 /* Active state: visually distinct and accessible for toggled sort key */
-.btn.btn-sort-time.active,
-.btn.btn-sort-cell.active {
+.pending-updates-sidebar .btn.btn-sort-time.active,
+.pending-updates-sidebar .btn.btn-sort-cell.active {
   background: linear-gradient(
     180deg,
     rgb(25 118 210 / 12%),
@@ -294,8 +300,8 @@
 }
 
 /* Provide small caret visuals using pseudo elements */
-.btn.btn-sort-time::after,
-.btn.btn-sort-cell::after {
+.pending-updates-sidebar .btn.btn-sort-time::after,
+.pending-updates-sidebar .btn.btn-sort-cell::after {
   content: '';
   display: inline-block;
   width: 0;
@@ -312,7 +318,7 @@
 }
 
 /* When active, rotate the caret to indicate chosen sort mode (subtle) */
-.btn.active::after {
+.pending-updates-sidebar .btn.active::after {
   transform: rotate(180deg) translateY(1px);
   opacity: 1;
 }
@@ -327,8 +333,8 @@
     flex-wrap: wrap;
   }
 
-  .btn.btn-sort-time,
-  .btn.btn-sort-cell {
+  .pending-updates-sidebar .btn.btn-sort-time,
+  .pending-updates-sidebar .btn.btn-sort-cell {
     min-width: 48%;
     flex: 1 1 48%;
   }
@@ -413,6 +419,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 12px;
   flex-wrap: wrap; /* allow items to wrap to a new row */
 }
 
