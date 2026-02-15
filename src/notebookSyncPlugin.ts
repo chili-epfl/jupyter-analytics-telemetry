@@ -98,7 +98,6 @@ const pushCellUpdate = async (panelManager: PanelManager) => {
       action: 'update_cell',
       update_id: crypto.randomUUID() // Generate unique update ID
     };
-    console.log('Awaiting pushUpdateToTeammates');
     await pushUpdateToTeammates(panelManager, JSON.stringify(payload));
   }
 };
@@ -111,19 +110,13 @@ const pushUpdateToTeammates = async (
     console.error('No websocket manager found');
     return;
   }
-  console.log('Sending Message');
+
   const notebookId = CompatibilityManager.getMetadataComp(
     panelManager.panel?.context.model,
     Selectors.notebookId
   );
-
-  console.log('Sending Message');
-
   const teammateList = getConnectedTeammates(notebookId);
-  console.log('Sending Message');
-
   if ((await teammateList).length === 0) {
-    console.log('No connected teammates');
     return;
   }
 

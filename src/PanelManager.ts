@@ -168,10 +168,6 @@ export class PanelManager {
                   const origCellId =
                     origMapping[cellIndex] || activeCell.model.id;
 
-                  console.log(
-                    `${APP_ID}: Cell changed, calling onCellChange callback:`,
-                    { origCellId, cellIndex }
-                  );
                   this._onCellChangeCallback(origCellId, cellIndex);
                 }
               };

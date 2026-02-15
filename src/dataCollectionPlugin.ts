@@ -58,7 +58,6 @@ export const dataCollectionPlugin = async (
 
     // Wire up teammate change callback to refresh sidebars
     panelManager.onTeammateChange = () => {
-      console.log(`${APP_ID}: Teammate change detected, refreshing sidebars`);
       refreshPendingSidebar();
       refreshLocationSidebar();
     };
