@@ -2,6 +2,25 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 5.0.1
+
+([Full Changelog](https://github.com/chili-epfl/jupyter-analytics-telemetry/compare/v5.0.0...b9c57d934fe729c0539377d7a3a3995330ae585b))
+
+### Merged PRs
+
+- Bug Fixes & Code Refactorization [#5](https://github.com/chili-epfl/jupyter-analytics-telemetry/pull/5) ([@Harkeerat2002](https://github.com/Harkeerat2002), [@zy-cai](https://github.com/zy-cai))
+
+### Contributors to this release
+
+The following people contributed discussions, new ideas, code and documentation contributions, and review.
+See [our definition of contributors](https://github-activity.readthedocs.io/en/latest/use/#how-does-this-tool-define-contributions-in-the-reports).
+
+([GitHub contributors page for this release](https://github.com/chili-epfl/jupyter-analytics-telemetry/graphs/contributors?from=2026-02-05&to=2026-02-15&type=c))
+
+@Harkeerat2002 ([activity](https://github.com/search?q=repo%3Achili-epfl%2Fjupyter-analytics-telemetry+involves%3AHarkeerat2002+updated%3A2026-02-05..2026-02-15&type=Issues)) | @zy-cai ([activity](https://github.com/search?q=repo%3Achili-epfl%2Fjupyter-analytics-telemetry+involves%3Azy-cai+updated%3A2026-02-05..2026-02-15&type=Issues))
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 5.0.0
 
 ([Full Changelog](https://github.com/chili-epfl/jupyter-analytics-telemetry/compare/v4.0.20...9fa74201c369af7ca6026eb58a315d56801c1472))
@@ -18,8 +37,6 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 ([GitHub contributors page for this release](https://github.com/chili-epfl/jupyter-analytics-telemetry/graphs/contributors?from=2025-05-26&to=2026-02-05&type=c))
 
 @Harkeerat2002 ([activity](https://github.com/search?q=repo%3Achili-epfl%2Fjupyter-analytics-telemetry+involves%3AHarkeerat2002+updated%3A2025-05-26..2026-02-05&type=Issues)) | @zy-cai ([activity](https://github.com/search?q=repo%3Achili-epfl%2Fjupyter-analytics-telemetry+involves%3Azy-cai+updated%3A2025-05-26..2026-02-05&type=Issues))
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.0.20
 
