@@ -20,10 +20,6 @@ export const teammateLocationPlugin = (
     // IMPORTANT: Set up fetch callback BEFORE adding to shell
     locationSidebar.setFetchTeammateLocationsCallback(
       async (notebookId: string) => {
-        console.log(
-          `${APP_ID}: Fetch callback invoked for notebook:`,
-          notebookId
-        );
         if (!PERSISTENT_USER_ID) {
           console.log(`${APP_ID}: No PERSISTENT_USER_ID`);
           return [];
