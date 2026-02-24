@@ -52,6 +52,7 @@ jobs:
           PYPI_MODE="${{ github.event.inputs.pypi_mode || 'silent' }}"
           ALT_MODE=$([[ "$PYPI_MODE" == "silent" ]] && echo "consent" || echo "silent")
           rm -rf dist/
+          pip install build
           CONSENT_MODE=$ALT_MODE python -m build --wheel
           python3 -c "
           import glob, os, re, sys
