@@ -2,6 +2,14 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 5.1.0
+
+No merged PRs
+
+Introduce a CONSENT_MODE env var baked into the JS bundle at build time. Silent mode enables data collection by default without a dialog (user can still opt out via settings); consent mode preserves the original dialog behavior. The publish workflow builds both variants per release, publishing the chosen mode to PyPI and attaching the other as a GitHub release asset.
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 5.0.1
 
 ([Full Changelog](https://github.com/chili-epfl/jupyter-analytics-telemetry/compare/v5.0.0...b9c57d934fe729c0539377d7a3a3995330ae585b))
@@ -18,8 +26,6 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 ([GitHub contributors page for this release](https://github.com/chili-epfl/jupyter-analytics-telemetry/graphs/contributors?from=2026-02-05&to=2026-02-15&type=c))
 
 @Harkeerat2002 ([activity](https://github.com/search?q=repo%3Achili-epfl%2Fjupyter-analytics-telemetry+involves%3AHarkeerat2002+updated%3A2026-02-05..2026-02-15&type=Issues)) | @zy-cai ([activity](https://github.com/search?q=repo%3Achili-epfl%2Fjupyter-analytics-telemetry+involves%3Azy-cai+updated%3A2026-02-05..2026-02-15&type=Issues))
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 5.0.0
 
