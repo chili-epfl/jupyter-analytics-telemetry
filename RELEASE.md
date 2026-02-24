@@ -104,6 +104,49 @@ Here is a summary of the steps to cut a new release:
 - Check the draft changelog
 - Run the "Step 2: Publish Release" workflow
 
+## Consent mode variants
+
+This extension can be built in two consent mode variants, controlled by the
+`CONSENT_MODE` environment variable baked into the JavaScript bundle at build time:
+
+| Mode      | Behavior                                                                                 | Default     |
+| --------- | ---------------------------------------------------------------------------------------- | ----------- |
+| `consent` | Shows a one-time dialog; user opts in or out                                             |             |
+| `silent`  | Data collection enabled by default, no dialog shown; user can still opt out via settings | ✓ (default) |
+
+### Local builds
+
+Use the named npm scripts to build a specific variant:
+
+```bash
+# silent variant (no dialog, collection always on — same as omitting CONSENT_MODE)
+jlpm build:prod:silent
+
+# consent variant (dialog shown)
+jlpm build:prod:consent
+```
+
+### Automated releases (Jupyter Releaser)
+
+The "Step 2: Publish Release" workflow includes a `pypi_mode` dropdown
+(default: `silent`) that controls which variant is published to PyPI.
+The other variant is automatically built, renamed with a `+<mode>` version
+suffix (e.g. `…5.0.1+consent-py3-none-any.whl`), and attached to the
+GitHub release as a downloadable asset.
+
+**Normal release** (silent on PyPI, consent as asset):
+
+- Run "Step 2: Publish Release" with `pypi_mode = silent` (or leave it at the default).
+
+**To publish the consent variant to PyPI instead**:
+
+- Run "Step 2: Publish Release" with `pypi_mode = consent`.
+- The silent variant will be attached as a GitHub release asset instead.
+
+> **Note:** Wheels with a local version suffix (`+consent`, `+silent`) are
+> intentionally rejected by PyPI and can only be installed directly from the
+> `.whl` file: `pip install <filename>.whl`
+
 ## Publishing to `conda-forge`
 
 If the package is not on conda forge yet, check the documentation to learn how to add it: https://conda-forge.org/docs/maintainer/adding_pkgs.html

@@ -112,8 +112,13 @@ export class PanelManager {
       // check if notebook is tagged
       const notebookId = isNotebookValid(this._panel);
       if (notebookId) {
-        // prompt the user with a dialog box to enable/disable the extension (opt-in) the first time they see a tagged notebook
-        this._showConsentDialogPromise().then(() => {
+        // prompt the user with a dialog box to enable/disable the extension (opt-in) the first time they see a tagged notebook,
+        // or skip the dialog entirely and enable collection if built in silent mode
+        const consentPromise =
+          __CONSENT_MODE__ === 'silent'
+            ? this._skipConsentDialog()
+            : this._showConsentDialogPromise();
+        consentPromise.then(() => {
           if (
             this._panel &&
             !this._panel.isDisposed &&
@@ -183,6 +188,19 @@ export class PanelManager {
         });
       }
     }
+  }
+
+  private async _skipConsentDialog() {
+    const dialogShown = this._dialogShownSettings.get('DialogShown')
+      .composite as boolean;
+    if (!dialogShown) {
+      // First run: enable data collection by default and mark as initialized
+      await this._dialogShownSettings.set('DialogShown', true);
+      await this._settings.set(EXTENSION_SETTING_NAME, true);
+      this._isDataCollectionEnabled = true;
+    }
+    // On subsequent runs, _isDataCollectionEnabled is already initialized from
+    // the stored setting in the constructor, so the user's choice is respected.
   }
 
   private async _showConsentDialogPromise() {
