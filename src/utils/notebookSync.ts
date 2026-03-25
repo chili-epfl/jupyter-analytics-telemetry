@@ -17,6 +17,7 @@ const UPDATE_NOTEBOOK_ACTION = 'update_notebook';
 interface ISyncMessagePayload {
   action: typeof UPDATE_CELL_ACTION | typeof UPDATE_NOTEBOOK_ACTION;
   content: any;
+  hint?: string;
 }
 // Helper Function to Log Interactions
 const logPendingUpdateInteraction = (
@@ -81,6 +82,7 @@ export const handleSyncMessage = (
     const jsonParsed: ISyncMessagePayload & { update_id?: string } =
       JSON.parse(jsonStr);
     const updateId = jsonParsed.update_id;
+    const hint = jsonParsed.hint;
 
     // Extract cell_id more thoroughly
     let cellId: string | undefined;
@@ -110,7 +112,8 @@ export const handleSyncMessage = (
         sender,
         senderType,
         updateId,
-        cellId
+        cellId,
+        hint
       );
     } else if (jsonParsed.action === UPDATE_NOTEBOOK_ACTION) {
       const contentJson = jsonParsed.content;
@@ -121,7 +124,8 @@ export const handleSyncMessage = (
         sender,
         senderType,
         updateId,
-        cellId
+        cellId,
+        hint
       );
     }
   } catch (error) {
@@ -1102,11 +1106,13 @@ function showUpdateNotification(
   sender: string,
   senderType: 'teacher' | 'teammate',
   updateId?: string,
-  explicitCellId?: string
+  explicitCellId?: string,
+  hint?: string
 ) {
   // Future: add a diff view of the changes
   let notificationTitle = 'Notebook Updated';
-  const notificationNote = '(Note: your code will be moved to one cell above.)';
+  const notificationNote =
+    '(Note: your code will be moved to one cell above. You can also update it later from the Pending Updates sidebar.)';
 
   // Display "teacher" or "teammate" based on the sender type
   const displaySender = senderType === 'teacher' ? 'teacher' : 'teammate';
@@ -1142,21 +1148,24 @@ function showUpdateNotification(
   const finalUpdateId =
     updateId || cellId || Math.random().toString(36).substring(2, 15);
 
-  let notificationBody = `Your ${displaySender} updated this notebook. Would you like to get the latest version? You can also update it later from the Pending Updates sidebar.`;
+  let notificationBody = `Your ${displaySender} updated this notebook. Would you like to get the latest version?`;
   if (action === UPDATE_CELL_ACTION) {
     notificationTitle = 'Cell Updated';
-    notificationBody = `Your ${displaySender} updated a cell in this notebook. Would you like to get the latest version? You can also update it later from the Pending Updates sidebar.`;
+    notificationBody = `Your ${displaySender} updated a cell in this notebook. Would you like to get the latest version?`;
   } else if (action === UPDATE_NOTEBOOK_ACTION) {
     notificationTitle = 'Notebook Updated';
-    notificationBody = `Your ${displaySender} updated the entire notebook. Would you like to get the latest version? You can also update it later from the Pending Updates sidebar.`;
+    notificationBody = `Your ${displaySender} updated the entire notebook. Would you like to get the latest version?`;
   } else {
     console.error('Unknown action type:', action);
     return;
   }
   const id = Math.random().toString(36).substring(2, 15);
+  const hintSpan = hint
+    ? ` <span style="font-weight: normal; font-style: italic; color: var(--jp-warn-color1, #f57c00);">\u201c${hint}\u201d</span>`
+    : '';
   const notificationHTML = `
       <div id="update-notification-${id}" class="notification">
-        <p style="font-weight: bold;">${notificationTitle}</p>
+        <p style="font-weight: bold;">${notificationTitle}${hintSpan}</p>
         <p>${notificationBody}</p>
         <p>${notificationNote}</p>
         <div class="notification-button-container">
