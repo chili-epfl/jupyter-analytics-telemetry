@@ -2,13 +2,19 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 5.1.1
+
+No merged PRs
+
+Support showing the optional hint included in the payload when receiving a cell update
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 5.1.0
 
 No merged PRs
 
 Introduce a CONSENT_MODE env var baked into the JS bundle at build time. Silent mode enables data collection by default without a dialog (user can still opt out via settings); consent mode preserves the original dialog behavior. The publish workflow builds both variants per release, publishing the chosen mode to PyPI and attaching the other as a GitHub release asset.
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 5.0.1
 
